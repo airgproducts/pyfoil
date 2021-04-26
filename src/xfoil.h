@@ -20,21 +20,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 *****************************************************************************/
-
- 
-/**
- *@file This class defines the Xfoil object.
- */
-
-
-#ifndef XFOIL_H
-#define XFOIL_H
+#pragma once
 
 
 /**
-*@class XFoil
-*@brief  The class which defines the XFoil object.
-
 This is a translation to C++ of the original Fortran code of Mark Drela and Harold Youngren.
 See http://raphael.mit.edu/xfoil for more information.
 */
@@ -44,12 +33,11 @@ See http://raphael.mit.edu/xfoil for more information.
 #include <string.h>
 
 #include <fmt/core.h>
-#include "format.hpp"
 #include "xfoil_params.h"
 
 #  define Q_UNUSED(x) (void)x;
 
-using namespace std;
+//using namespace std;
     //------ derived dimensioning limit parameters
 
 
@@ -158,10 +146,10 @@ private:
     void qccalc(int ispec,double *alfa, double *cl, double *cm,double minf, double qinf, int *ncir, double xcir[], double ycir[], double scir[], double qcir[]);
     void mapgam(int iac, double &alg, double &clg, double &cmg);
     bool eiwset(int nc1);
-    void cgauss(int nn,complex <double> z[IMX4+1][IMX4+1],complex <double> r[IMX4+1]);
+    void cgauss(int nn,std::complex <double> z[IMX4+1][IMX4+1],std::complex <double> r[IMX4+1]);
     void zccalc(int mtest);
     void zcnorm(int mtest);
-    void zlefind(complex<double>*zle,complex<double>zc[],double wc[],int nc,complex<double>piq[], double agte);
+    void zlefind(std::complex<double>*zle,std::complex<double>zc[],double wc[],int nc,std::complex<double>piq[], double agte);
     void piqsum();
     void ftp();
     void scinit(int n, double x[], double xp[], double y[], double yp[], double s[], double sle);
@@ -299,8 +287,8 @@ public:
     double sspec[IBX+1],xspoc[IBX+1],yspoc[IBX+1];
     double qspec[IPX+1][IBX+1],qspecp[IPX+1][IBX+1];
     double alqsp[IPX+1],clqsp[IPX+1],cmqsp[IPX+1];
-    complex<double> dzte, chordz, zleold, zcoldw[ICX+1];
-    complex<double> piq[ICX+1], cn[IMX+1], eiw[ICX+1][IMX+1];
+    std::complex<double> dzte, chordz, zleold, zcoldw[ICX+1];
+    std::complex<double> piq[ICX+1], cn[IMX+1], eiw[ICX+1][IMX+1];
     double dnTrace[100];//... added techwinder
     double dgTrace[100];//... added techwinder
     int QMax;
@@ -363,8 +351,8 @@ private:
 
     double qdof0,qdof1,qdof2,qdof3,ffilt;
 
-    complex<double> zc[ICX+1], zc_cn[ICX+1][IMX4+1];
-    complex<double> cnsav[IMX+1];
+    std::complex<double> zc[ICX+1], zc_cn[ICX+1][IMX4+1];
+    std::complex<double> cnsav[IMX+1];
 
     int retyp, matyp;
     double rlx;
@@ -377,7 +365,7 @@ private:
     int ncam, nthk;
 
     blData blsav[3];
-    complex<double> conjg(complex<double> cplx);
+    std::complex<double> conjg(std::complex<double> cplx);
 
     bool m_bTrace;
 
@@ -923,5 +911,3 @@ c   gtick       airfoil-plot tick marks size [as fraction of arc length]
 
     //-----End Specific Inverse MDES-------------------------------
 };
-
-#endif

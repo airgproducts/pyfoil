@@ -3169,7 +3169,7 @@ void XFoil::getmax(double x[],double y[], double yp[], int n,double &xmax, doubl
             break;//go to 20
         }
         dx = -res/resp;
-        dx = sign( min(0.5*ddx,fabs(dx)), dx);
+        dx = sign( std::min(0.5*ddx,fabs(dx)), dx);
         xmax += dx;
         if(fabs(dx) < xtol)
         {
@@ -3234,8 +3234,8 @@ void XFoil::xlfind(double &sle, double x[], double xp[], double y[], double yp[]
         //------ newton delta for sle
         dsle = -res/ress;
 
-        dsle = max( dsle , -0.01*fabs(dslen) );
-        dsle = min( dsle ,  0.01*fabs(dslen) );
+        dsle = std::max( dsle , -0.01*fabs(dslen) );
+        dsle = std::min( dsle ,  0.01*fabs(dslen) );
         sle += dsle;
         if(fabs(dsle) < dseps) return;
     }
@@ -5662,8 +5662,8 @@ stop25:
         ds = s[i+1]-s[i];
         if(ds != 0.0)
         {
-            dsmin = min(dsmin,ds);
-            dsmax = max(dsmax,ds);
+            dsmin = std::min(dsmin,ds);
+            dsmax = std::max(dsmax,ds);
         }
     }
 
@@ -8211,10 +8211,10 @@ void XFoil::sss(double ss, double *s1, double *s2, double del, double xbf, doubl
         ds1 = -(rs1*a22 - a12*rs2) / det;
         ds2 = -(a11*rs2 - rs1*a21) / det;
 
-        ds1 = min( ds1 , 0.01*stot );
-        ds1 = max( ds1 , -.01*stot );
-        ds2 = min( ds2 , 0.01*stot );
-        ds2 = max( ds2 , -.01*stot );
+        ds1 = std::min( ds1 , 0.01*stot );
+        ds1 = std::max( ds1 , -.01*stot );
+        ds2 = std::min( ds2 , 0.01*stot );
+        ds2 = std::max( ds2 , -.01*stot );
 
         *s1 = *s1 + ds1;
         *s2 = *s2 + ds2;
@@ -10269,7 +10269,7 @@ void XFoil::flap()
         }
 
         st2p = st2 + sfrac*(sb[it2 ]-st2);
-        it2q = max(it2-1,1);
+        it2q = std::max(it2-1,1);
         st2q = st2 + sfrac*(sb[it2q]-st2);
         if(sb[it2] >st2q) {
             //------ simply move adjacent point
@@ -10586,12 +10586,12 @@ bool XFoil::eiwset(int nc1)
 
     //---- set  m = 0  numbers
     for (ic=1; ic<=nc; ic++)
-        eiw[ic][0] = complex<double>(1.0, 0.0);
+        eiw[ic][0] = std::complex<double>(1.0, 0.0);
 
 
     //---- set  m = 1  numbers
     for (ic=1; ic<=nc; ic++)
-        eiw[ic][1] = exp(complex<double>( 0.0 , wc[ic] ) );
+        eiw[ic][1] = exp(std::complex<double>( 0.0 , wc[ic] ) );
 
 
     //---- set  m > 1  numbers by indexing appropriately from  m = 1  numbers
@@ -10618,7 +10618,7 @@ void XFoil::scinit(int n, double x[], double xp[], double y[], double yp[], doub
     //----------------------------------------------------------
 
     //     include 'circle.inc'
-    complex<double> dcn=0, zle=0, zte=0;
+    std::complex<double> dcn=0, zle=0, zte=0;
     int ipass=0, ic=0;
     double sic=0, dxds=0, dyds=0, qim=0, dzwt=0;
 
@@ -10642,12 +10642,12 @@ void XFoil::scinit(int n, double x[], double xp[], double y[], double yp[], doub
     //---- save te gap and airfoil chord
     double dxte = x[1] - x[n];
     double dyte = y[1] - y[n];
-    dzte = complex<double>(dxte,dyte);
+    dzte = std::complex<double>(dxte,dyte);
 
     double chordx = 0.5*(x[1]+x[n]) - xle;
     double chordy = 0.5*(y[1]+y[n]) - yle;
-    chordz = complex<double>( chordx , chordy );
-    zleold = complex<double>(xle, yle);
+    chordz = std::complex<double>( chordx , chordy );
+    zleold = std::complex<double>(xle, yle);
 
     //      write(*,1100) real(dzte), imag(dzte), agte*180.0
     //1100 format(/' current te gap  dx dy =', 27.4,
@@ -10687,7 +10687,7 @@ void XFoil::scinit(int n, double x[], double xp[], double y[], double yp[], doub
 
             //------ set q(w) - qo   (qo defined so that q(w)-qo = 0  at  w = 0 , 2 PI)
             qim = atan2(dxds, -dyds ) - 0.5*(wc[ic]-PI)*(1.0+agte)- qim0;
-            piq[ic] = complex<double>(0.0, qim );
+            piq[ic] = std::complex<double>(0.0, qim );
 
         }
 
@@ -10695,7 +10695,7 @@ void XFoil::scinit(int n, double x[], double xp[], double y[], double yp[], doub
         ftp();
 
         //---- zero out average real part and add on qo we took out above
-        cn[0] = complex<double>( 0.0 , imag(cn[0])+qim0 );
+        cn[0] = std::complex<double>( 0.0 , imag(cn[0])+qim0 );
 
         //---- transform back to get entire  piq = p(w) + iq(w)
         piqsum();
@@ -10750,7 +10750,7 @@ void XFoil::scinit(int n, double x[], double xp[], double y[], double yp[], doub
         if(sinw>0.0) sinwe = pow(sinw,(1.0-agte));
 
         double hwc = 0.5*(wc[ic]-PI)*(1.0+agte) - 0.5*PI;
-        zcoldw[ic] = sinwe * exp( piq[ic] + complex<double>(0.0,hwc) );
+        zcoldw[ic] = sinwe * exp( piq[ic] + std::complex<double>(0.0,hwc) );
     }
 
     qimold = imag(cn[0]);
@@ -10764,10 +10764,10 @@ void XFoil::ftp()
     //     slow-fourier-transform p(w) using trapezoidal integration.
     //----------------------------------------------------------------
 
-    complex<double> zsum=0;
+    std::complex<double> zsum=0;
 
     for (int m=0; m<= mc;m++){
-        zsum = complex<double>(0.0,0.0);
+        zsum = std::complex<double>(0.0,0.0);
         for(int ic=2; ic<= nc-1; ic++)
             zsum = zsum + piq[ic]*eiw[ic][m];
 
@@ -10785,10 +10785,10 @@ void XFoil::piqsum()
     //     inverse-transform to get back modified
     //     speed function and its conjugate.
     //---------------------------------------------
-    complex<double> zsum=0;
+    std::complex<double> zsum=0;
 
     for(int ic=1; ic <= nc; ic++){
-        zsum = complex<double>(0.0,0.0);
+        zsum = std::complex<double>(0.0,0.0);
         for(int m=0; m<= mc; m++){
             zsum = zsum + cn[m]*conjg(eiw[ic][m]);
         }
@@ -10799,11 +10799,11 @@ void XFoil::piqsum()
 }
 
 
-complex<double> XFoil::conjg(complex<double> cplx)
+std::complex<double> XFoil::conjg(std::complex<double> cplx)
 {
     double a = real(cplx);
     double b = imag(cplx);
-    return complex<double>(a, -b);
+    return std::complex<double>(a, -b);
 }
 
 
@@ -10815,8 +10815,8 @@ void XFoil::zcnorm(int mtest)
     //    influence coefficients  dz/dcn .
     //-----------------------------------------------
     //      include 'circle.inc'
-//    complex<double> dzdw1, dzdw2;
-    complex<double> zcnew=0, zle=0, zte=0, zc_zte=0, zte_cn[IMX4+1];
+//    std::complex<double> dzdw1, dzdw2;
+    std::complex<double> zcnew=0, zle=0, zte=0, zc_zte=0, zte_cn[IMX4+1];
     int m=0, ic=0;
 
     //---- find current le location
@@ -10842,7 +10842,7 @@ void XFoil::zcnorm(int mtest)
 
     //---- add on rotation to mapping coefficient so qccalc gets the right alpha
     double qimoff = -imag( log(chordz/zte) );
-    cn[0] = cn[0] - complex<double>(0.0, qimoff);
+    cn[0] = cn[0] - std::complex<double>(0.0, qimoff);
 
     //---- shift airfoil to put le at old location
     for (ic=1; ic<= nc; ic++)
@@ -10862,19 +10862,19 @@ void XFoil::zccalc(int mtest)
     //    for each point.
     //--------------------------------------------------------
     //      include 'circle.inc'
-    complex<double> dzdw1=0, dzdw2=0, dz_piq1=0, dz_piq2=0;
+    std::complex<double> dzdw1=0, dzdw2=0, dz_piq1=0, dz_piq2=0;
 
     //---- integrate upper airfoil surface coordinates from x,y = 4,0
     int ic = 1;
-    zc[ic] = complex<double>(4.0,0.0);
-    for (int m=1; m<= mtest; m++) zc_cn[ic][m] = complex<double>(0.0,0.0);
+    zc[ic] = std::complex<double>(4.0,0.0);
+    for (int m=1; m<= mtest; m++) zc_cn[ic][m] = std::complex<double>(0.0,0.0);
 
     double sinw = 2.0*sin(0.5*wc[ic]);
     double sinwe = 0.0;
     if(sinw>0.0) sinwe = pow(sinw,(1.0-agte));
 
     double hwc = 0.5*(wc[ic]-PI)*(1.0+agte) - 0.5*PI;
-    dzdw1 = sinwe * exp( piq[ic] + complex<double>(0.0,hwc) );
+    dzdw1 = sinwe * exp( piq[ic] + std::complex<double>(0.0,hwc) );
 
     for (ic=2; ic<= nc; ic++){
 
@@ -10883,7 +10883,7 @@ void XFoil::zccalc(int mtest)
         if(sinw>0.0) sinwe = pow(sinw,(1.0-agte));
 
         hwc = 0.5*(wc[ic]-PI)*(1.0+agte) - 0.5*PI;
-        dzdw2 = sinwe * exp( piq[ic] + complex<double>(0.0,hwc));
+        dzdw2 = sinwe * exp( piq[ic] + std::complex<double>(0.0,hwc));
 
         zc[ic]  = 0.5*(dzdw1+dzdw2)*dwc + zc[ic-1];
         dz_piq1 = 0.5*(dzdw1      )*dwc;
@@ -10910,11 +10910,11 @@ void XFoil::zccalc(int mtest)
 }
 
 
-void XFoil::zlefind(complex<double>*zle,complex<double>zc[],double wc[],
-                    int nc,complex<double>piq[], double agte)
+void XFoil::zlefind(std::complex<double>*zle,std::complex<double>zc[],double wc[],
+                    int nc,std::complex<double>piq[], double agte)
 {
 
-    complex<double> dzdw1=0, dzdw2=0, zte=0;
+    std::complex<double> dzdw1=0, dzdw2=0, zte=0;
     int ic=0, ic1=0, ic2=0;
     //---- temporary work arrays for splining near leading edge
     int ntx=33;
@@ -10937,19 +10937,19 @@ void XFoil::zlefind(complex<double>*zle,complex<double>zc[],double wc[],
     }
 
     //---- set restricted spline limits around leading edge
-    ic1 = max( icle - (ntx-1)/2 ,  1 );
-    ic2 = min( icle + (ntx-1)/2 , nc );
+    ic1 = std::max( icle - (ntx-1)/2 ,  1 );
+    ic2 = std::min( icle + (ntx-1)/2 , nc );
 
     //---- set up derivatives at spline endpoints
     double sinw = 2.0*sin(0.5*wc[ic1]);
     double sinwe = pow(sinw,(1.0-agte));
     double hwc = 0.5*(wc[ic1]-PI)*(1.0+agte) - 0.5*PI;
-    dzdw1 = sinwe * exp( piq[ic1] + complex<double>(0.0,hwc));
+    dzdw1 = sinwe * exp( piq[ic1] +  std::complex<double>(0.0,hwc));
 
     sinw = 2.0*sin(0.5*wc[ic2]);
     sinwe = pow(sinw,(1.0-agte));
     hwc = 0.5*(wc[ic2]-PI)*(1.0+agte) - 0.5*PI;
-    dzdw2 = sinwe * exp(piq[ic2] + complex<double>(0.0,hwc));
+    dzdw2 = sinwe * exp(piq[ic2] +  std::complex<double>(0.0,hwc));
 
     //---- fill temporary x,y coordinate arrays
     for(ic=ic1; ic<=ic2;ic++){
@@ -11007,7 +11007,7 @@ void XFoil::zlefind(complex<double>*zle,complex<double>zc[],double wc[],
     //---- set final leading edge point complex coordinate
     xcle = seval(wcle,xc,xcw,wc+ic1-1, nic);
     ycle = seval(wcle,yc,ycw,wc+ic1-1, nic);
-    *zle = complex<double>(xcle,ycle);
+    *zle =  std::complex<double>(xcle,ycle);
 
     return;
 }
@@ -11056,7 +11056,7 @@ void XFoil::qccalc(int ispec,double *alfa, double *cl, double *cm,
     //    ispec=1 or 2.  The cl calculation uses the
     //    transformed karman-tsien cp.
     //---------------------------------------------------
-    complex<double> dz, za, eia, cmt,cft,cft_a;
+     std::complex<double> dz, za, eia, cmt,cft,cft_a;
     //    double rr1, rr2, rr3;
     int icp, ic, ipass;
     //    int ll;
@@ -11088,9 +11088,9 @@ void XFoil::qccalc(int ispec,double *alfa, double *cl, double *cm,
         //------ set alpha in the circle plane
         alfcir = *alfa - imag(cn[0]);
 
-        cmt   = complex<double>(0.0,0.0);
-        cft   = complex<double>(0.0,0.0);
-        cft_a = complex<double>(0.0,0.0);
+        cmt   =  std::complex<double>(0.0,0.0);
+        cft   =  std::complex<double>(0.0,0.0);
+        cft_a =  std::complex<double>(0.0,0.0);
 
         //------ set surface speed for current circle plane alpha
         for (ic=1; ic<= nc; ic++){
@@ -11127,7 +11127,7 @@ void XFoil::qccalc(int ispec,double *alfa, double *cl, double *cm,
             cpc_q2 = (1.0 - bfac*cpcom2)/(beta + bfac*cpinc2) * cpi_q2;
             cpc_a2 = cpc_q2*qc_a[icp];
 
-            za = (zc[icp] + zc[ic])*0.5 - complex<double>(0.25,0.0);
+            za = (zc[icp] + zc[ic])*0.5 - std::complex<double>(0.25,0.0);
             dz =  zc[icp] - zc[ic];
 
             cmt   = cmt   - 0.5*(cpcom1 + cpcom2)*dz*conjg(za)
@@ -11141,9 +11141,9 @@ void XFoil::qccalc(int ispec,double *alfa, double *cl, double *cm,
 
         //------ rotate force vector into freestream coordinates
 
-        eia = exp(complex<double>(0.0,- *alfa));
+        eia = exp(std::complex<double>(0.0,- *alfa));
         cft   = cft  *eia;
-        cft_a = cft_a*eia + cft*complex<double>(0.0,-1.0);
+        cft_a = cft_a*eia + cft*std::complex<double>(0.0,-1.0);
 
         //------ lift is real part of complex force vector
         double clt   = real(cft);
@@ -11165,7 +11165,7 @@ void XFoil::qccalc(int ispec,double *alfa, double *cl, double *cm,
         }
 
     }
-    std::string str = format("qccalc: cl convergence failed.  dalpha =%.4f", dalfa);
+    std::string str = fmt::format("qccalc: cl convergence failed.  dalpha =%.4f", dalfa);
     this->write(str);
 }
 
@@ -11181,8 +11181,8 @@ void XFoil::mapgen(int n, double x[],double y[])
     //      dimension x(nc), y(nc)
     //
     Q_UNUSED(n);
-    complex<double> qq[IMX4+1][IMX4+1];
-    complex<double> dcn[IMX4+1];
+    std::complex<double> qq[IMX4+1][IMX4+1];
+    std::complex<double> dcn[IMX4+1];
     double dx=0, dy=0, qimoff=0, dcnmax=0;
     int ncn=0, m=0;
 
@@ -11193,7 +11193,7 @@ void XFoil::mapgen(int n, double x[],double y[])
     qim0 = atan2( dx , -dy )  +  0.5*PI*(1.0+agte);
 
     qimoff = qim0 - imag(cn[0]);
-    cn[0] = cn[0] + complex<double>( 0.0 , qimoff );
+    cn[0] = cn[0] + std::complex<double>( 0.0 , qimoff );
 
     //--- inverse-transform and calculate geometry zc = z(w)
     //ccc   call cnfilt(ffilt)
@@ -11207,7 +11207,7 @@ void XFoil::mapgen(int n, double x[],double y[])
     //cc      cn[0] = cn[0] - cmplx( 0.0 , qimoff )
 
     //--- enforce lighthill's first constraint
-    cn[0] = complex<double>( 0.0, imag(cn[0]) );
+    cn[0] = std::complex<double>( 0.0, imag(cn[0]) );
 
     //--- number of free coefficients
     ncn = 1;
@@ -11256,13 +11256,13 @@ void XFoil::mapgen(int n, double x[],double y[])
 }
 
 
-void XFoil::cgauss(int nn, complex <double> z[IMX4+1][IMX4+1],complex <double> r[IMX4+1]){
+void XFoil::cgauss(int nn, std::complex<double> z[IMX4+1][IMX4+1],std::complex<double> r[IMX4+1]){
     //*******************************************
     //     solves general complex linear systems.
     //*******************************************
     //      complex z(nsiz,nsiz), r(nsiz,nrhs)
     // nrhs = 1 // techwinder : one right hand side is enough !
-    complex<double> pivot=0, temp=0, ztmp=0;
+    std::complex<double> pivot=0, temp=0, ztmp=0;
     int np1=0;
     int nx=0;
     int l=0,k=0, n=0, np=0;
@@ -11277,7 +11277,7 @@ void XFoil::cgauss(int nn, complex <double> z[IMX4+1][IMX4+1],complex <double> r
             if(std::abs(z[n][np])-std::abs(z[nx][np])>0)  nx = n;
         }
 
-        pivot = complex<double>(1.0,0.0)/z[nx][np];
+        pivot = std::complex<double>(1.0,0.0)/z[nx][np];
 
         //----- switch pivots
         z[nx][np] = z[np][np];
@@ -11467,7 +11467,7 @@ void XFoil::cncalc(double qc[], bool lsymm)
         //cc
         //c        endif
 
-        piq[ic] = complex<double>( log(pfun) , 0.0 );
+        piq[ic] = std::complex<double>( log(pfun) , 0.0 );
 
     }
 
@@ -11480,12 +11480,12 @@ void XFoil::cncalc(double qc[], bool lsymm)
 
     //---- fourier-transform p(w) to get new cn coefficients
     ftp();
-    cn[0] = complex<double>(0.0 , qimold);
+    cn[0] = std::complex<double>(0.0 , qimold);
 
     if(lsymm) {
         for( m=1; m<= mc; m++){
             cnr = 2.0*real(cn[m]) - real(cnsav[m]);
-            cn[m] = complex<double>( cnr , 0.0 );
+            cn[m] = std::complex<double>( cnr , 0.0 );
         }
     }
 
@@ -11747,7 +11747,7 @@ void XFoil::cnfilt(double ffilt)
         cwt = 0.5*(1.0 + cos(PI*freq));
         cwtx = cwt;
         if(ffilt>0.0) cwtx = pow(cwt,ffilt);
-        cn[m] = complex<double>(real(cn[m]) * cwtx, imag(cn[m]) * cwtx);
+        cn[m] = std::complex<double>(real(cn[m]) * cwtx, imag(cn[m]) * cwtx);
     }
 }
 
@@ -11765,7 +11765,7 @@ void XFoil::pert_init(int kqsp)
     dy = ycold[2] - ycold[1];
     qim0 = atan2(dx, -dy)  +  0.5*PI*(1.0+agte);
     qimoff = qim0 - imag(cn[0]);
-    cn[0] = cn[0] + complex<double>(0.0, qimoff);
+    cn[0] = cn[0] + std::complex<double>(0.0, qimoff);
 
     //      write(*,*)
     //      write(*,*) 'current mapping coefficients...'
@@ -11796,7 +11796,7 @@ void XFoil::pert_process(int kqsp)
     Q_UNUSED(kqsp);
     int m=0, ncn=0;
     //    double dx,dy,qimoff;
-    complex<double> qq[IMX/4+1][IMX/4+1],dcn[IMX/4+1];
+    std::complex<double> qq[IMX/4+1][IMX/4+1],dcn[IMX/4+1];
 
     //--------------------------------------------------------
     //     calculates the perturbed geometry resulting from
@@ -11816,7 +11816,7 @@ void XFoil::pert_process(int kqsp)
     //cc      cn(0) = cn(0) - cmplx(0.0 , qimoff )
 
     //---- enforce lighthill's first constraint
-    cn[0] = complex<double>(0.0, imag(cn[0]) );
+    cn[0] = std::complex<double>(0.0, imag(cn[0]) );
     //---- number of free coefficients
     ncn = 1;
 
@@ -11838,7 +11838,7 @@ void XFoil::pert_process(int kqsp)
         double dcnmax = 0.0;
         for (m=1; m<= ncn; m++){
             cn[m] = cn[m] - dcn[m];
-            dcnmax = max(std::abs(dcn[m]), dcnmax );
+            dcnmax = std::max(std::abs(dcn[m]), dcnmax );
         }
 
         //cc     call cnfilt(ffilt)
@@ -12129,7 +12129,7 @@ bool XFoil::mixed(int kqsp)
             //----- minimum panel length adjacent to te
             ds1 = sqrt( (x[1]-x[2]  )*(x[1]-x[2]  ) + (y[1]-y[2]  )*(y[1]-y[2]  ));
             ds2 = sqrt( (x[n]-x[n-1])*(x[n]-x[n-1]) + (y[n]-y[n-1])*(y[n]-y[n-1]));
-            dsmin = min( ds1 , ds2 );
+            dsmin = std::min( ds1 , ds2 );
 
             //----- control point on bisector just ahead of te point
             xbis = xte - bwt*dsmin*cbis;
@@ -12839,7 +12839,7 @@ void XFoil::lerscl(double *x, double *xp, double* y, double *yp,
 
         //------ thickness factor tails off exponentially towards trailing edge
         xoc = xbar/chord;
-        arg = min( xoc/doc , 15.0);
+        arg = std::min( xoc/doc , 15.0);
         tfac = 1.0 - (1.0-srfac)*exp(-arg);
 
         //------ set new chord x,y coordinates by changing thickness locally

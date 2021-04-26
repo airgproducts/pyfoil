@@ -39,16 +39,15 @@ This is a translation to C++ of the original Fortran code of Mark Drela and Haro
 See http://raphael.mit.edu/xfoil for more information.
 */
 
-#include "xfoil-lib_global.h"
-
 #include <complex>
+#include <stdio.h>
+#include <string.h>
 
-#include <QTextStream>
-
+#include <fmt/core.h>
 #include "format.hpp"
+#include "xfoil_params.h"
 
-#include <xfoil_params.h>
-
+#  define Q_UNUSED(x) (void)x;
 
 using namespace std;
     //------ derived dimensioning limit parameters
@@ -75,7 +74,7 @@ struct blData
 
 
 
-class XFOILLIBSHARED_EXPORT XFoil
+class XFoil
 {
 public:
     XFoil();
@@ -90,14 +89,14 @@ public:
     void pangen();
     void pert_process(int kqsp);
     void pert_init(int kqsp);
-    void HanningFilter(double cfilt, QTextStream &ts);
+    void HanningFilter(double cfilt, std::stringstream &ts);
     void smooq(int kq1,int kq2,int kqsp);
     void ExecMDES();
     bool ExecQDES();
     bool initialize();
     bool initXFoilGeometry(int fn, const double *fx, const double *fy, double *fnx, double *fny);
     bool initXFoilAnalysis(double Re, double alpha, double Mach, double NCrit, double XtrTop, double XtrBot,
-                                  int reType, int maType, bool bViscous, QTextStream &outStream);
+                                  int reType, int maType, bool bViscous, std::stringstream &outStream);
 
     void splqsp(int kqsp);
     void qspcir();
@@ -111,7 +110,6 @@ public:
     void fillHk();
     void fillRTheta();
     void write(std::string str, bool bFullReport = false);
-    void writeString(QString str, bool bFullReport = false);
     double DeRotate();
     bool specal();
     bool speccl();
@@ -292,7 +290,7 @@ public:
     static bool s_bCancel;
     static bool s_bFullReport;
 
-    //QTextStream *m_pOutStream;
+    //std::stringstream *m_pOutStream;
     std::stringstream *m_pOutStream;
 
     double agte,ag0,qim0,qimold;

@@ -31,6 +31,9 @@ See http://raphael.mit.edu/xfoil for more information.
 #include <complex>
 #include <stdio.h>
 #include <string.h>
+#include <vector>
+#include <tuple>
+#include <iostream>
 
 #include <fmt/core.h>
 #include "xfoil_params.h"
@@ -39,6 +42,10 @@ See http://raphael.mit.edu/xfoil for more information.
 
 //using namespace std;
     //------ derived dimensioning limit parameters
+
+
+#define PI 3.141592654
+#define EPSILON 1.e-6
 
 
 struct blData
@@ -82,7 +89,7 @@ public:
     void ExecMDES();
     bool ExecQDES();
     bool initialize();
-    bool initXFoilGeometry(int fn, const double *fx, const double *fy, double *fnx, double *fny);
+    bool initXFoilGeometry(std::vector<std::pair<double, double>>);
     bool initXFoilAnalysis(double Re, double alpha, double Mach, double NCrit, double XtrTop, double XtrBot,
                                   int reType, int maType, bool bViscous, std::stringstream &outStream);
 

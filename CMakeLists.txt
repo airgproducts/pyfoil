@@ -20,7 +20,7 @@ if (WIN32)
 endif()
 
 # OPTIONS
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 14)
 OPTION(BUILD_PYTHON_BINDINGS "create python bindings" ON)
 
 if (BUILD_PYTHON_BINDINGS)
@@ -34,6 +34,8 @@ endif()
 # FIND DEPENDENCIES
 
 add_subdirectory(lib/fmt)
-add_subdirectory(src)
+find_package(fmt)
+
+add_subdirectory(src xfoil)
 
 MESSAGE(STATUS "installing to ${python_libs}")

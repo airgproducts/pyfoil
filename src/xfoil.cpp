@@ -23,9 +23,6 @@
 
 #include "xfoil.h"
 
-#define PI 3.141592654
-#define EPSILON 1.e-6
-
 bool XFoil::s_bCancel = false;
 bool XFoil::s_bFullReport = false;
 double XFoil::vaccel = 0.01;
@@ -2526,9 +2523,10 @@ bool XFoil::cpcalc(int n, double q[], double qinf, double minf, double cp[])
 
 void XFoil::write(std::string str, bool bFullReport)
 {
+    std::cout << str << std::endl;
     if(!bFullReport && !s_bFullReport) return;
-    if(!m_pOutStream) return;
-    *m_pOutStream << str;
+    //if(!m_pOutStream) return;
+    //*m_pOutStream << str;
 }
 
 
@@ -3983,15 +3981,14 @@ bool XFoil::iblsys()
 /** Loads the Foil's geometry in XFoil,
  *  calculates the normal vectors,
  *  and sets the results in current foil */
-bool XFoil::initXFoilGeometry(int fn, double const *fx, double const *fy, double*fnx, double*fny)
+bool XFoil::initXFoilGeometry(std::vector<std::pair<double, double>> points)
 {
-    for (int i =0; i<fn; i++)
-    {
-        xb[i+1] = fx[i];
-        yb[i+1] = fy[i];
+    for (int i=0; i<points.size(); i++) {
+        xb[i+1] = points[i].first;
+        yb[i+1] = points[i].second;
     }
 
-    nb = fn;
+    nb = points.size();
     lflap  = false;
     lbflap = false;
 
@@ -4006,12 +4003,6 @@ bool XFoil::initXFoilGeometry(int fn, double const *fx, double const *fy, double
     if(Preprocess())
     {
         CheckAngles();
-        for (int k=0; k<n;k++)
-        {
-            fnx[k] = nx[k+1];
-            fny[k] = ny[k+1];
-        }
-        fn = n;
         return true;
     }
     else
@@ -9749,7 +9740,7 @@ bool XFoil::ViscousIter()
     this->write(str);
 
     auto pos = str.find("QN");
-    if(pos>0)
+    if(pos!=std::string::npos)
     {
         lvconv = false;
         str = "--------UNCONVERGED----------\n\n";

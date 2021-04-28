@@ -18,3 +18,5 @@ set(CPP_FILES
 
 
 pybind11_add_module(xfoil pybind.cpp ${CPP_FILES} ${HEADER_FILES})
+
+target_link_libraries(xfoil PRIVATE fmt::fmt)

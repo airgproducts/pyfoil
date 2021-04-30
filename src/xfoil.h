@@ -170,7 +170,7 @@ private:
     void RestoreQDES();
 
     bool setMach();
-    void scheck(double x[], double y[], int *n, double stol, bool *lchange);
+    void clean_curve(double x[], double y[], int *n, double stol, bool *lchange);
     void sss(double ss, double *s1, double *s2, double del, double xbf, double ybf,    double x[], double xp[], double y[], double yp[], double s[],int n, int iside);
     bool inside(double xb[], double yb[], int nb, double xbf, double ybf);
     void flap();
@@ -197,7 +197,7 @@ private:
     bool bldif(int ityp);
     bool blkin();
     bool blmid(int ityp);
-    bool blprv(double xsi,double ami,double cti,double thi,double dsi,double dswaki,double uei);
+    bool bl_set_primary_2(double xsi,double ami,double cti,double thi,double dsi,double dswaki,double uei);
     bool blsolve();
     bool blsys();
     bool blvar(int ityp);
@@ -248,7 +248,7 @@ private:
     bool qiset();
     bool qvfue();
     bool qwcalc();
-    bool scalc(double x[], double y[], double s[], int n);
+    bool get_segment_lengthes(double x[], double y[], double s[], int n);
     bool segspl( double x[], double xs[], double s[], int n);
     bool segspld(double x[], double xs[], double s[], int n, double xs1, double xs2);
     bool setbl();

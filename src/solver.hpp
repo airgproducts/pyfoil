@@ -43,7 +43,7 @@ class Solver {
         double mach = 0.;
 
 
-        unsigned int max_iterations = 200;
+        unsigned int max_iterations = 100;
 
         bool initialize_bl_auto = true;
 

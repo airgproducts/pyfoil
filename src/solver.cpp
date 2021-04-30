@@ -28,21 +28,15 @@ Result Solver::run_aoa(double aoa) {
     this->solver.lwake = false;
     this->solver.lvconv = false;
 
+
     this->solver.setQInf(1.0);
     auto str = fmt::format("Alpha = {:.3f}°", aoa*180/PI);
     //traceLog(str);
 
     // here we go !
-    if (!this->solver.specal())
-    {
-        str = std::string("Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ");
-        //traceLog(str);
-        //m_bErrors = true;
-        //return false;
-        Result result;
-        result.converged = false;
-        return result;
-    }
+
+    this->solver.setBLInitialized(false);
+    this->solver.lipan = false;
 
     return this->solve();
 }
@@ -66,8 +60,18 @@ Result Solver::run_cl(double cl) {
 }
 
 Result Solver::solve() {
-    this->solver.setBLInitialized(false);
-    this->solver.lipan = false;
+
+    if (!this->solver.specal())
+    {
+        auto str = std::string("Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ");
+        //traceLog(str);
+        //m_bErrors = true;
+        //return false;
+        Result result;
+        result.converged = false;
+        return result;
+    }
+    
 
     this->solver.lwake = false;
     this->solver.lvconv = false;
@@ -167,9 +171,16 @@ std::vector<Result> Solver::run_aoa(std::vector<double> aoa) {
 
     std::vector<Result> result;
 
+    this->solver.setBLInitialized(false);
+    this->solver.lipan = false;
+
     for (auto alpha: aoa) {
+        this->solver.setAlpha(alpha);
+        this->solver.lalfa = true;
+        this->solver.setQInf(1.0);
+
         try {
-            result.push_back(this->run_aoa(alpha));
+            result.push_back(this->solve());
         } catch(std::runtime_error) {
             Result unconverged_result;
             unconverged_result.aoa = alpha*180.0/PI;

@@ -700,7 +700,7 @@ bool XFoil::abcopy()
         }
     }
 
-    scalc(x,y,s,n);
+    get_segment_lengthes(x,y,s,n);
     segspl(x,xp,s,n);
     segspl(y,yp,s,n);
     ncalc(x,y,s,n,nx,ny);
@@ -1588,7 +1588,7 @@ bool XFoil::blmid(int ityp)
 /** ----------------------------------------------------------
  *     set bl primary "2" variables from parameter list
  *  ---------------------------------------------------------- */
-bool XFoil::blprv(double xsi, double ami, double cti, double thi,
+bool XFoil::bl_set_primary_2(double xsi, double ami, double cti, double thi,
                   double dsi, double dswaki, double uei)
 {
 
@@ -2524,7 +2524,7 @@ bool XFoil::cpcalc(int n, double q[], double qinf, double minf, double cp[])
 void XFoil::write(std::string str, bool bFullReport)
 {
     std::cout << str << std::endl;
-    if(!bFullReport && !s_bFullReport) return;
+    //if(!bFullReport && !s_bFullReport) return;
     //if(!m_pOutStream) return;
     //*m_pOutStream << str;
 }
@@ -2549,14 +2549,12 @@ double XFoil::curv(double ss, double x[], double xs[], double y[], double ys[], 
     ilow = 1;
     i = n;
 
-stop10:
-    if(i-ilow<=1) goto stop11;
-    imid = (i+ilow)/2;
-    if(ss < s[imid]) i = imid;
-    else ilow = imid;
-    goto stop10;
+    while(i-ilow > 1) {
+        imid = (i+ilow)/2;
+        if(ss < s[imid]) i = imid;
+        else ilow = imid;
 
-stop11:
+    }
 
     ds = s[i] - s[i-1];
     t = (ss - s[i-1]) / ds;
@@ -2591,14 +2589,13 @@ double XFoil::d2val(double ss, double x[], double xs[], double s[], int n)
 
     ilow = 1;
     i = n;
-stop10:
-    if(i-ilow<=1) goto stop11;
-    imid = (i+ilow)/2;
-    if(ss < s[imid]) i = imid;
-    else ilow = imid;
-    goto stop10;
+    
+    while(i-ilow>1) {
+        imid = (i+ilow)/2;
+        if(ss < s[imid]) i = imid;
+        else ilow = imid;
+    }
 
-stop11:
     ds = s[i] - s[i-1];
     t = (ss - s[i-1]) / ds;
     cx1 = ds*xs[i-1] - x[i] + x[i-1];
@@ -3754,7 +3751,7 @@ void XFoil::hipnt(double chpnt, double thpnt)
         yb[i] = yb[i] + ybl;
     }
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -4332,10 +4329,11 @@ bool XFoil::mhinge()
 
     //---- find s[i]..s[i-1] interval containing s=bots
     for (i=n; i>= 2;i--){
-        if(s[i-1]<bots) goto stop41;
+        if(s[i-1]<bots){
+            break;
+        }
     }
 
-stop41:
     //---- add on bottom surface chunk bots..s[i],    missed in the do 20 loop.
     dx = x[i] - botx;
     dy = y[i] - boty;
@@ -4472,7 +4470,7 @@ bool XFoil::mrchdu()
                 //         at the previous "1" station and the current "2" station
                 //         (the "1" station coefficients will be ignored)
 
-                blprv(xsi,ami,cti,thi,dsi,dswaki,uei);
+                bl_set_primary_2(xsi,ami,cti,thi,dsi,dswaki,uei);
                 blkin();
 
                 //-------- check for transition and set appropriate flags and things
@@ -4594,70 +4592,70 @@ bool XFoil::mrchdu()
                 dslim(dsw,thi,msq,hklim);
                 dsi = dsw + dswaki;
 
-                if(dmax<=deps) goto stop110;
+                if(dmax<=deps) {
+                    break;
+                }
             }
 
-            str = fmt::format("     mrchdu: convergence failed at {} ,  side {}, res ={:.4f}\n", ibl, is, dmax);
-            this->write(str, true);
+            if(dmax > deps) {
 
-            if (dmax<= 0.1) goto stop109;
-            //------ the current unconverged solution might still be reasonable...
+                str = fmt::format("     mrchdu: convergence failed at {} ,  side {}, res ={:.4f}\n", ibl, is, dmax);
+                this->write(str, true);
 
-            if(dmax > 0.1)
-            {
-                //------- the current solution is garbage --> extrapolate values instead
-                if(ibl>3)
-                {
-                    if(ibl<=iblte[is])
+
+                if(dmax > 0.1) {
+                    //------- the current solution is garbage --> extrapolate values instead
+                    if(ibl>3)
                     {
-                        thi = thet[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
-                        dsi = dstr[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
-                        uei = uedg[ibm][is];
-                    }
-                    else{
-                        if(ibl==iblte[is]+1)
+                        if(ibl<=iblte[is])
                         {
-                            cti = cte;
-                            thi = tte;
-                            dsi = dte;
+                            thi = thet[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
+                            dsi = dstr[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
                             uei = uedg[ibm][is];
                         }
                         else{
-                            thi = thet[ibm][is];
-                            ratlen = (xssi[ibl][is]-xssi[ibm][is]) / (10.0*dstr[ibm][is]);
-                            dsi = (dstr[ibm][is] + thi*ratlen) / (1.0 + ratlen);
-                            uei = uedg[ibm][is];
+                            if(ibl==iblte[is]+1)
+                            {
+                                cti = cte;
+                                thi = tte;
+                                dsi = dte;
+                                uei = uedg[ibm][is];
+                            }
+                            else{
+                                thi = thet[ibm][is];
+                                ratlen = (xssi[ibl][is]-xssi[ibm][is]) / (10.0*dstr[ibm][is]);
+                                dsi = (dstr[ibm][is] + thi*ratlen) / (1.0 + ratlen);
+                                uei = uedg[ibm][is];
+                            }
                         }
+                        if(ibl==itran[is]) cti = 0.05;
+                        if(ibl>itran[is]) cti = ctau[ibm][is];
                     }
-                    if(ibl==itran[is]) cti = 0.05;
-                    if(ibl>itran[is]) cti = ctau[ibm][is];
+
                 }
 
+                bl_set_primary_2(xsi,ami,cti,thi,dsi,dswaki,uei);
+                blkin();
+
+                //------- check for transition and set appropriate flags and things
+                if((!simi) && (!turb)) {
+                    trchek();
+                    ami = ampl2;
+                    if( tran) itran[is] = ibl;
+                    if(!tran) itran[is] = ibl+2;
+                }
+
+                //------- set all other extrapolated values for current station
+                if(ibl<itran[is])   blvar(1);
+                if(ibl>=itran[is])  blvar(2);
+                if(wake)            blvar(3);
+
+                if(ibl<itran[is])   blmid(1);
+                if(ibl>=itran[is])  blmid(2);
+                if(wake)            blmid(3);
             }
-
-stop109:
-            blprv(xsi,ami,cti,thi,dsi,dswaki,uei);
-            blkin();
-
-            //------- check for transition and set appropriate flags and things
-            if((!simi) && (!turb)) {
-                trchek();
-                ami = ampl2;
-                if( tran) itran[is] = ibl;
-                if(!tran) itran[is] = ibl+2;
-            }
-
-            //------- set all other extrapolated values for current station
-            if(ibl<itran[is])   blvar(1);
-            if(ibl>=itran[is])  blvar(2);
-            if(wake)            blvar(3);
-
-            if(ibl<itran[is])   blmid(1);
-            if(ibl>=itran[is])  blmid(2);
-            if(wake)            blmid(3);
 
             //------ pick up here after the newton iterations
-stop110:
             sens = sennew;
 
             //------ store primary variables
@@ -4672,7 +4670,7 @@ stop110:
             ctq[ibl][is]  = cq2;
 
             //------ set "1" variables to "2" variables for next streamwise station
-            blprv(xsi,ami,cti,thi,dsi,dswaki,uei);
+            bl_set_primary_2(xsi,ami,cti,thi,dsi,dswaki,uei);
             blkin();
 
             stepbl();
@@ -4772,6 +4770,7 @@ bool XFoil::mrchue()
 
 
             direct = true;
+            bool newton_done = false;
 
             //------ newton iteration loop for current station
             for (itbl=1; itbl<= 25;itbl++){//100
@@ -4780,7 +4779,7 @@ bool XFoil::mrchue()
                 //         at the previous "1" station and the current "2" station
                 //         (the "1" station coefficients will be ignored)
 
-                blprv(xsi,ami,cti,thi,dsi,dswaki,uei);
+                bl_set_primary_2(xsi,ami,cti,thi,dsi,dswaki,uei);
                 blkin();
 
                 //-------- check for transition and set appropriate flags and things
@@ -4809,8 +4808,7 @@ bool XFoil::mrchue()
                 else
                     blsys();
 
-                if(direct)
-                {
+                if(direct) {
                     //--------- try direct mode (set due = 0 in currently empty 4th line)
                     vs2[4][1] = 0.0;
                     vs2[4][2] = 0.0;
@@ -4826,6 +4824,7 @@ bool XFoil::mrchue()
 
                     rlx = 1.0;
                     if(dmax>0.3) rlx = 0.3/dmax;
+                    
                     //--------- see if direct mode is not applicable
                     if(ibl != iblte[is]+1) {
                         //---------- calculate resulting kinematic shape parameter hk
@@ -4838,15 +4837,14 @@ bool XFoil::mrchue()
                         if(ibl>=itran[is]) hmax = htmax;
                         direct = (hktest<hmax);
                     }
-                    if(direct)
-                    {
+
+                    if(direct) {
                         //---------- update as usual
                         if(ibl>=itran[is])     cti = cti + rlx*vsrez[1];
                         thi = thi + rlx*vsrez[2];
                         dsi = dsi + rlx*vsrez[3];
                     }
-                    else
-                    {
+                    else {
                         //---------- set prescribed hk for inverse calculation at the current station
                         if(ibl<itran[is])
                             //----------- laminar case: relatively slow increase in hk downstream
@@ -4882,11 +4880,11 @@ bool XFoil::mrchue()
 
                         //---------- try again with prescribed hk
 
-                        goto stop100;
+                        newton_done = true;
+                        break;
                     }
                 }
-                else
-                {
+                else {
                     //-------- inverse mode (force hk to prescribed value htarg)
                     vs2[4][1] = 0.0;
                     vs2[4][2] = hk2_t2;
@@ -4918,64 +4916,67 @@ bool XFoil::mrchue()
                 dsw = dsi - dswaki;
                 dslim(dsw,thi,msq,hklim);
                 dsi = dsw + dswaki;
-                if(dmax<=0.00001) goto stop110;
-stop100:
-                int nothing=1;      (void)nothing;    //c++ doesn(t like gotos
+                if(dmax<=0.00001) {
+                    newton_done = true;
+                    break;
+                }
             }//end itbl loop
 
+            if(!newton_done) {
 
-            str = fmt::format("     mrchue: convergence failed at {},  side {}, res = {:.3f}\n", ibl, is, dmax);
-            this->write(str, true);
+                str = fmt::format("     mrchue: convergence failed at {},  side {}, res = {:.3f}\n", ibl, is, dmax);
+                this->write(str, true);
 
-            //------ the current unconverged solution might still be reasonable...
-            if(dmax > 0.1)
-            {
+                //------ the current unconverged solution might still be reasonable...
+                if(dmax > 0.1)
+                {
 
-                //------- the current solution is garbage --> extrapolate values instead
-                if(ibl>3) {
-                    if(ibl<=iblte[is]) {
-                        thi = thet[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
-                        dsi = dstr[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
-                    }
-                    else{
-                        if(ibl==iblte[is]+1) {
-                            cti = cte;
-                            thi = tte;
-                            dsi = dte;
+                    //------- the current solution is garbage --> extrapolate values instead
+                    if(ibl>3) {
+                        if(ibl<=iblte[is]) {
+                            thi = thet[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
+                            dsi = dstr[ibm][is] * sqrt(xssi[ibl][is]/xssi[ibm][is]);
                         }
                         else{
-                            thi = thet[ibm][is];
-                            ratlen = (xssi[ibl][is]-xssi[ibm][is]) / (10.0*dstr[ibm][is]);
-                            dsi = (dstr[ibm][is] + thi*ratlen) / (1.0 + ratlen);
+                            if(ibl==iblte[is]+1) {
+                                cti = cte;
+                                thi = tte;
+                                dsi = dte;
+                            }
+                            else{
+                                thi = thet[ibm][is];
+                                ratlen = (xssi[ibl][is]-xssi[ibm][is]) / (10.0*dstr[ibm][is]);
+                                dsi = (dstr[ibm][is] + thi*ratlen) / (1.0 + ratlen);
+                            }
                         }
+                        if(ibl==itran[is]) cti = 0.05;
+                        if(ibl>itran[is]) cti = ctau[ibm][is];
+
+                        uei = uedg[ibl][is];
+
+                        if(ibl>2 && ibl<nbl[is]) uei = 0.5*(uedg[ibl-1][is] + uedg[ibl+1][is]);
                     }
-                    if(ibl==itran[is]) cti = 0.05;
-                    if(ibl>itran[is]) cti = ctau[ibm][is];
-
-                    uei = uedg[ibl][is];
-
-                    if(ibl>2 && ibl<nbl[is]) uei = 0.5*(uedg[ibl-1][is] + uedg[ibl+1][is]);
                 }
+                //109
+                bl_set_primary_2(xsi,ami,cti,thi,dsi,dswaki,uei);
+                blkin();
+                //------- check for transition and set appropriate flags and things
+                if((!simi) && (!turb)) {
+                    trchek();
+                    ami = ampl2;
+                    if(      tran) itran[is] = ibl;
+                    if(!tran) itran[is] = ibl+2;
+                }
+                //------- set all other extrapolated values for current station
+                if(ibl<itran[is])  blvar(1);
+                if(ibl>=itran[is])  blvar(2);
+                if(wake)  blvar(3);
+                if(ibl<itran[is])  blmid(1);
+                if(ibl>=itran[is])  blmid(2);
+                if(wake)  blmid(3);
             }
-            //109
-            blprv(xsi,ami,cti,thi,dsi,dswaki,uei);
-            blkin();
-            //------- check for transition and set appropriate flags and things
-            if((!simi) && (!turb)) {
-                trchek();
-                ami = ampl2;
-                if(      tran) itran[is] = ibl;
-                if(!tran) itran[is] = ibl+2;
-            }
-            //------- set all other extrapolated values for current station
-            if(ibl<itran[is])  blvar(1);
-            if(ibl>=itran[is])  blvar(2);
-            if(wake)  blvar(3);
-            if(ibl<itran[is])  blmid(1);
-            if(ibl>=itran[is])  blmid(2);
-            if(wake)  blmid(3);
-            //------ pick up here after the newton iterations
-stop110:
+            
+            //stop110
             //------ store primary variables
             if(ibl<itran[is]) ctau[ibl][is] = ami;
             if(ibl>=itran[is]) ctau[ibl][is] = cti;
@@ -4989,7 +4990,7 @@ stop110:
             delt[ibl][is] = de2;
 
             //------ set "1" variables to "2" variables for next streamwise station
-            blprv(xsi,ami,cti,thi,dsi,dswaki,uei);
+            bl_set_primary_2(xsi,ami,cti,thi,dsi,dswaki,uei);
             blkin();
 
             stepbl();
@@ -5194,7 +5195,7 @@ void XFoil::pangen()
     //      endif
     //
     //---- set arc length spline parameter
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
 
     //---- spline raw airfoil coordinates
     segspl(xb,xbp,sb,nb);
@@ -5294,18 +5295,15 @@ void XFoil::pangen()
     w2[nb] = 1.0;
 
     //---- fix curvature at LE point by modifying equations adjacent to LE
-    for (i=2; i<=nb-1; i++)
-    {
-        if(fabs(sb[i]-sble)<EPSILON || i==ible || i==ible+1)
-        {
+    for (i=2; i<=nb-1; i++) {
+        if(fabs(sb[i]-sble)<EPSILON || i==ible || i==ible+1) {
             //------- if node falls right on LE point, fix curvature there
             w1[i] = 0.0;
             w2[i] = 1.0;
             w3[i] = 0.0;
             w5[i] = cvle;
         }
-        else if(sb[i-1]<sble && sb[i]>sble)
-        {
+        else if(sb[i-1]<sble && sb[i]>sble) {
             //------- modify equation at node just before LE point
             dsm = sb[i-1] - sb[i-2];
             dsp = sble    - sb[i-1];
@@ -5325,10 +5323,9 @@ void XFoil::pangen()
             w3[i] =  smoosq * (-1.0/dsp           ) /dso;
             w5[i] = w5[i] + smoosq*cvle/(dsm*dso);
 
-            goto stop51;
+            break;
         }
     }
-stop51:
 
     //---- set artificial curvature at bunching points and fix it there
     for (i=2; i<=nb-1; i++)
@@ -5433,8 +5430,7 @@ stop51:
     }
 
     //---- newton iteration loop for new node positions
-    for (int iter=1; iter<= 20; iter++)
-    {//iter 10
+    for (int iter=1; iter<= 20; iter++) {//iter 10
 
         //------ set up tri-diagonal system for node position deltas
         cv1  = seval(snew[1],w5,w6,sb,nb);
@@ -5550,15 +5546,15 @@ stop51:
             snew[i] = snew[i] + rlx*w4[i];
         }
 
-        if(fabs(dmax)<0.001) goto stop11;
+        if(fabs(dmax)<0.001){
+            break;
+        }
 
     }
 
     //TRACE("Paneling convergence failed.  Continuing anyway...\n");
     str = "Paneling convergence failed.  Continuing anyway...\n";
     this->write(str, true);
-
-stop11:
 
     //---- set new panel node coordinates
     for(i=1; i<=n; i++)
@@ -5571,10 +5567,8 @@ stop11:
 
     //---- go over buffer airfoil again, checking for corners (double points)
     ncorn = 0;
-    for(int ib=1; ib<= nb-1; ib++)
-    {//25
-        if(fabs(sb[ib]-sb[ib+1])<EPSILON)
-        {
+    for(int ib=1; ib<= nb-1; ib++) {//25
+        if(fabs(sb[ib]-sb[ib+1])<EPSILON) {
             //------- found one !
 
             ncorn = ncorn+1;
@@ -5583,50 +5577,47 @@ stop11:
             sbcorn = sb[ib];
 
             //------- find current-airfoil panel which contains corner
-            for(i=1; i<=n ; i++)
-            {//252
+            for(i=1; i<=n ; i++) {//252
 
                 //--------- keep stepping until first node past corner
-                if(s[i] <= sbcorn) goto stop252;
+                if(s[i] > sbcorn) {
 
-                //---------- move remainder of panel nodes to make room for additional node
-                for(j=n; j>=i; j--)
-                {
-                    x[j+1] = x[j];
-                    y[j+1] = y[j];
-                    s[j+1] = s[j];
+                    //---------- move remainder of panel nodes to make room for additional node
+                    for(j=n; j>=i; j--) {
+                        x[j+1] = x[j];
+                        y[j+1] = y[j];
+                        s[j+1] = s[j];
+                    }
+                    n = n+1;
+
+                    if(n > IQX-1) {
+                        //TRACE("panel: too many panels. increase iqx in xfoil.inc");
+                        std::string str = "Panel: Too many panels. Increase IQX";
+                        this->write(str, true);
+                        return;
+                    }
+                    x[i] = xbcorn;
+                    y[i] = ybcorn;
+                    s[i] = sbcorn;
+
+                    //---------- shift nodes adjacent to corner to keep panel sizes comparable
+                    if(i-2 >= 1)
+                    {
+                        s[i-1] = 0.5*(s[i] + s[i-2]);
+                        x[i-1] = seval(s[i-1],xb,xbp,sb,nb);
+                        y[i-1] = seval(s[i-1],yb,ybp,sb,nb);
+                    }
+
+                    if(i+2 <= n)
+                    {
+                        s[i+1] = 0.5*(s[i] + s[i+2]);
+                        x[i+1] = seval(s[i+1],xb,xbp,sb,nb);
+                        y[i+1] = seval(s[i+1],yb,ybp,sb,nb);
+                    }
+
+                    //---------- go on to next input geometry point to check for corner
+                    goto stop25;
                 }
-                n = n+1;
-
-                if(n > IQX-1)
-                {
-                    //TRACE("panel: too many panels. increase iqx in xfoil.inc");
-                    std::string str = "Panel: Too many panels. Increase IQX";
-                    this->write(str, true);
-                    return;
-                }
-                x[i] = xbcorn;
-                y[i] = ybcorn;
-                s[i] = sbcorn;
-
-                //---------- shift nodes adjacent to corner to keep panel sizes comparable
-                if(i-2 >= 1)
-                {
-                    s[i-1] = 0.5*(s[i] + s[i-2]);
-                    x[i-1] = seval(s[i-1],xb,xbp,sb,nb);
-                    y[i-1] = seval(s[i-1],yb,ybp,sb,nb);
-                }
-
-                if(i+2 <= n)
-                {
-                    s[i+1] = 0.5*(s[i] + s[i+2]);
-                    x[i+1] = seval(s[i+1],xb,xbp,sb,nb);
-                    y[i+1] = seval(s[i+1],yb,ybp,sb,nb);
-                }
-
-                //---------- go on to next input geometry point to check for corner
-                goto stop25;
-stop252:
                 nothing = 0; (void)nothing;// C++ doesn't like gotos
             }
         }
@@ -5634,7 +5625,7 @@ stop25:
         nothing = 0; (void)nothing;// C++ doesn't like gotos
     }
 
-    scalc(x,y,s,n);
+    get_segment_lengthes(x,y,s,n);
     segspl(x,xp,s,n);
     segspl(y,yp,s,n);
     lefind(sle,x,xp,y,yp,s,n);
@@ -5735,7 +5726,7 @@ bool XFoil::Preprocess()
         area = area + 0.5*(yb[i]+yb[ip])*(xb[i]-xb[ip]);
     }
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     //    segspl(yb,ybp,sb,nb);
     geopar(xb,xbp,yb,ybp,sb,nb, w1,sble,chordb,areab,radble,angbte,
@@ -6917,7 +6908,7 @@ bool XFoil::saveblData(int icom){
  *      calculates the arc length array s  |
  *      for a 2-d array of points (x,y).   |
  * ----------------------------------------- */
-bool XFoil::scalc(double x[], double y[], double s[], int n)
+bool XFoil::get_segment_lengthes(double x[], double y[], double s[], int n)
 {
     s[1] = 0.0;
     for (int i=2;i<=n; i++)
@@ -7217,7 +7208,7 @@ bool XFoil::setbl()
             due2 = uedg[ibl][is] - usav[ibl][is];
             dds2 = d2_u2*due2;
 
-            blprv(xsi,ami,cti,thi,dsi,dswaki,uei);//cti
+            bl_set_primary_2(xsi,ami,cti,thi,dsi,dswaki,uei);//cti
             blkin();
 
             //---- check for transition and set tran, xt, etc. if found
@@ -7476,7 +7467,7 @@ bool XFoil::setbl()
 }
 
 
-void XFoil::scheck(double x[], double y[], int *n, double stol, bool *lchange){
+void XFoil::clean_curve(double x[], double y[], int *n, double stol, bool *lchange){
 
     //-------------------------------------------------------------
     //     removes points from an x,y spline contour wherever
@@ -7505,7 +7496,7 @@ void XFoil::scheck(double x[], double y[], int *n, double stol, bool *lchange){
     //--- check stol for sanity
     if(stol>0.3)
     {
-        std::string str("scheck:  bad value for small panels (stol > 0.3)\n");
+        std::string str("clean_curve:  bad value for small panels (stol > 0.3)\n");
         this->write(str, true);
         return;
     }
@@ -10114,7 +10105,7 @@ int XFoil::cadd(int ispl, double atol, double xrf1, double xrf2)
         yb[i] = w2[i];
     }
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -10508,10 +10499,10 @@ void XFoil::flap()
 
     //-- check new geometry for splinter segments
     stol = 0.2;
-    scheck(xb,yb,&nb, stol, &lchange);
+    clean_curve(xb,yb,&nb, stol, &lchange);
 
     //-- spline new geometry
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -11560,7 +11551,7 @@ void XFoil::ExecMDES()
     mapgen(nb,xb,yb);
 
     //----- spline new buffer airfoil
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     splind(xb,xbp,sb,nb,-999.0,-999.0);
     splind(yb,ybp,sb,nb,-999.0,-999.0);
 
@@ -12033,7 +12024,7 @@ bool XFoil::mixed(int kqsp)
 
     //    cosa = cos(alfa);
     //    sina = sin(alfa);
-    scalc(x,y,s,n);
+    get_segment_lengthes(x,y,s,n);
 
     //---- zero-out and set dof shape functions
     for (i=1; i<=n; i++){
@@ -12232,7 +12223,7 @@ bool XFoil::mixed(int kqsp)
 
         //        cosa = cos(alfa);
         //        sina = sin(alfa);
-        scalc(x,y,s,n);
+        get_segment_lengthes(x,y,s,n);
 
         //---- set correct surface speed over target segment including dof contributions
         for(i=iq1; i<= iq2; i++){
@@ -12333,7 +12324,7 @@ bool XFoil::ExecQDES()
     adeg = alfa/dtor;
 
     //----- spline new airfoil shape
-    scalc(x,y,s,n);
+    get_segment_lengthes(x,y,s,n);
     splind(x,xp,s,n,-999.0,-999.0);
     splind(y,yp,s,n,-999.0,-999.0);
     ncalc(x,y,s,n,nx,ny);
@@ -12386,7 +12377,7 @@ void XFoil::RestoreQDES()
         y[i] = yb[i];
     }*/
 
-    scalc(x,y,s,n);
+    get_segment_lengthes(x,y,s,n);
     splind(x,xp,s,n,-999.0,-999.0);
     splind(y,yp,s,n,-999.0,-999.0);
     ncalc(x,y,s,n,nx,ny);
@@ -12522,7 +12513,7 @@ void XFoil::thkcam(double tfac, double cfac){
         yb[i] = w2[i];
     }
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -12611,12 +12602,12 @@ void XFoil::interpolate(double xf1[], double yf1[], int n1,
         y2[i+1] = yf2[i];
     }
 
-    scalc(x1,y1,s1,n1);
+    get_segment_lengthes(x1,y1,s1,n1);
     segspld(x1,xp1,s1,n1, -999.0, -999.0);
     segspld(y1,yp1,s1,n1, -999.0, -999.0);
     lefind(sleint1, x1, xp1, y1, yp1, s1, n1);
 
-    scalc(x2,y2,s2,n2);
+    get_segment_lengthes(x2,y2,s2,n2);
     segspld(x2,xp2,s2,n2, -999.0, -999.0);
     segspld(y2,yp2,s2,n2, -999.0, -999.0);
     lefind(sleint2, x2, xp2, y2, yp2, s2, n2);
@@ -12625,7 +12616,7 @@ void XFoil::interpolate(double xf1[], double yf1[], int n1,
           x2, xp2, y2, yp2, s2, n2, sleint2,
           xb,yb,nb,mixt);
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -12663,7 +12654,7 @@ double XFoil::DeRotate()
     //    write(*,1080) arad / dtor
     // 1080  format(/'rotating buffer airfoil by ',f8.3,' deg.')
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -12735,7 +12726,7 @@ void XFoil::tgap(double gapnew, double blend)
         }
     }
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -12768,7 +12759,7 @@ void XFoil::lerad(double rfac, double blend)
     }
 
     //---- spline new coordinates
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 
@@ -12910,7 +12901,7 @@ void XFoil::naca4(int ides, int nside)
     }
     nb = ib;
 
-    scalc(xb,yb,sb,nb);
+    get_segment_lengthes(xb,yb,sb,nb);
     segspl(xb,xbp,sb,nb);
     segspl(yb,ybp,sb,nb);
 

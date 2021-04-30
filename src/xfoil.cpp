@@ -3568,8 +3568,7 @@ bool XFoil::ggcalc()
 
 
     //---- set inviscid alpha=0,90 surface speeds for this geometry
-    for (int i=1; i<=n+1; i++)
-    {
+    for (int i=1; i<=n+1; i++) {
         qinvu[i][1] = gamu[i][1];
         qinvu[i][2] = gamu[i][2];
     }
@@ -3590,18 +3589,26 @@ bool XFoil::baksub(int n, double a[IQX][IQX], int indx[], double b[])
         ll = indx[i];
         sum = b[ll];
         b[ll] = b[i];
-        if(ii!=0)
-            for (j=ii;j<=i-1; j++) sum = sum - a[i][j]*b[j];
-        else
-            if(sum!=0.0) ii = i;
+        if(ii!=0) {
+            for (j=ii;j<=i-1; j++) {
+                sum = sum - a[i][j]*b[j];
+            }
+
+        } else if(sum != 0.0) {
+            ii = i;
+        }
 
         b[i] = sum;
     }
     //
     for (i=n; i>=1; i--){
         sum = b[i];
-        if(i<n)
-            for (j=i+1; j<=n; j++) sum = sum - a[i][j]*b[j];
+        
+        if(i<n){
+            for (j=i+1; j<=n; j++) {
+                sum = sum - a[i][j]*b[j];
+            }
+        }
 
         b[i] = sum/a[i][i];
     }
@@ -3771,8 +3778,7 @@ bool XFoil::hkin(double h, double msq, double &hk, double &hk_h, double &hk_msq)
 }
 
 
-bool XFoil::hsl(double hk, double &hs, double &hs_hk, double &hs_rt, double &hs_msq)
-{
+bool XFoil::hsl(double hk, double &hs, double &hs_hk, double &hs_rt, double &hs_msq) {
     //---- laminar hs correlation
     double tmp;
     if(hk<4.35)
@@ -3800,8 +3806,7 @@ bool XFoil::hsl(double hk, double &hs, double &hs_hk, double &hs_rt, double &hs_
 
 
 
-bool XFoil::hst(double hk, double rt, double msq, double &hs, double &hs_hk, double &hs_rt, double &hs_msq)
-{
+bool XFoil::hst(double hk, double rt, double msq, double &hs, double &hs_hk, double &hs_rt, double &hs_msq) {
     double hsmin, dhsinf,  rtz, rtz_rt, ho, ho_rt, hr, hr_hk, hr_rt, fm;
     double grt, hdif, rtmp, htmp, htmp_hk, htmp_rt;
 
@@ -4264,10 +4269,8 @@ bool XFoil::mhinge()
     hfy  = 0.0;
 
     //---- integrate pressures on top and bottom sides of flap
-    for (i=2;i<=n; i++)
-    {
-        if(s[i-1]<tops || s[i]>bots)
-        {
+    for (i=2;i<=n; i++) {
+        if(s[i-1]<tops || s[i]>bots) {
             dx = x[i] - x[i-1];
             dy = y[i] - y[i-1];
             xmid = 0.5*(x[i]+x[i-1]) - xof;
@@ -4287,9 +4290,15 @@ bool XFoil::mhinge()
     bool bexit = false;
     while (!bexit)
     {
-        if(s[i]<tops) i++;
-        else bexit  =true;
-        if (i>n) {} //we have a problem...
+        if(s[i]<tops) {
+            i++;
+        } else {
+            bexit = true;
+        }
+        
+        if (i>n) {
+            throw std::runtime_error("we have a problem");
+        } //we have a problem...
     }
 
 
@@ -4475,7 +4484,7 @@ bool XFoil::mrchdu()
 
                 //-------- check for transition and set appropriate flags and things
                 if((!simi) && (!turb)) {
-                    trchek();
+                    transition_check();
                     ami = ampl2;
                     if( tran) itran[is] = ibl;
                     if(!tran) itran[is] = ibl+2;
@@ -4639,7 +4648,7 @@ bool XFoil::mrchdu()
 
                 //------- check for transition and set appropriate flags and things
                 if((!simi) && (!turb)) {
-                    trchek();
+                    transition_check();
                     ami = ampl2;
                     if( tran) itran[is] = ibl;
                     if(!tran) itran[is] = ibl+2;
@@ -4784,7 +4793,7 @@ bool XFoil::mrchue()
 
                 //-------- check for transition and set appropriate flags and things
                 if((!simi) && (!turb)) {
-                    trchek();
+                    transition_check();
                     ami = ampl2;
 
                     //--------- fixed bug   md 7 jun 99
@@ -4962,7 +4971,7 @@ bool XFoil::mrchue()
                 blkin();
                 //------- check for transition and set appropriate flags and things
                 if((!simi) && (!turb)) {
-                    trchek();
+                    transition_check();
                     ami = ampl2;
                     if(      tran) itran[is] = ibl;
                     if(!tran) itran[is] = ibl+2;
@@ -5616,13 +5625,11 @@ void XFoil::pangen()
                     }
 
                     //---------- go on to next input geometry point to check for corner
-                    goto stop25;
+                    break; // jump out of inner (i) loop was goto stop25
                 }
-                nothing = 0; (void)nothing;// C++ doesn't like gotos
             }
         }
-stop25:
-        nothing = 0; (void)nothing;// C++ doesn't like gotos
+        //stop25
     }
 
     get_segment_lengthes(x,y,s,n);
@@ -5852,310 +5859,310 @@ bool XFoil::psilin(int iNode, double xi, double yi, double nxi, double nyi, doub
         sds = aste/dste;
     }
 
-    for(jo=1; jo<=n; jo++)
-    {
+    bool skip = false;
+
+    for(jo=1; jo<=n; jo++) {
         //stop10
         jp = jo+1;
         jm = jo-1;
-        jq = jp+1;
+        jq = jo+2;
 
-        if(jo==1) jm = jo;
-        else
-        {
-            if(jo==n-1) jq = jp;
-            else
-            {
-                if(jo==n)
-                {
-                    jp = 1;
-                    if((x[jo]-x[jp])*(x[jo]-x[jp]) + (y[jo]-y[jp])*(y[jo]-y[jp]) < seps*seps)
-                        goto stop12;
-                }
+        if(jo==1) {
+            jm = jo;
+        } else if(jo == n-1) {
+            jq = jo+1;
+        } else if(jo==n){
+            jp = 1;
+            double dx = x[jo]-x[jp];
+            double dy = y[jo]-y[jp];
+            if((dx*dx + dy*dy) < seps*seps){
+                skip = true;
+                break;
             }
         }
-//        Q_ASSERT(jq<=n);
+        //        Q_ASSERT(jq<=n);
 
         dso = sqrt((x[jo]-x[jp])*(x[jo]-x[jp]) + (y[jo]-y[jp])*(y[jo]-y[jp]));
 
         //------ skip null panel
-        if(fabs(dso)<1.0e-7) goto stop10;
+        if(fabs(dso) >= 1.0e-7) {
 
-        dsio = 1.0 /dso;
+            dsio = 1.0 /dso;
 
-        apan = apanel[jo];
+            apan = apanel[jo];
 
-        rx1 = xi - x[jo];
-        ry1 = yi - y[jo];
-        rx2 = xi - x[jp];
-        ry2 = yi - y[jp];
+            rx1 = xi - x[jo];
+            ry1 = yi - y[jo];
+            rx2 = xi - x[jp];
+            ry2 = yi - y[jp];
 
-        sx = (x[jp] - x[jo]) /dso;
-        sy = (y[jp] - y[jo]) /dso;
+            sx = (x[jp] - x[jo]) /dso;
+            sy = (y[jp] - y[jo]) /dso;
 
-        x1 = sx*rx1 + sy*ry1;
-        x2 = sx*rx2 + sy*ry2;
-        yy = sx*ry1 - sy*rx1;
+            x1 = sx*rx1 + sy*ry1;
+            x2 = sx*rx2 + sy*ry2;
+            yy = sx*ry1 - sy*rx1;
 
-        rsq1 = rx1*rx1 + ry1*ry1;
-        rsq2 = rx2*rx2 + ry2*ry2;
+            rsq1 = rx1*rx1 + ry1*ry1;
+            rsq2 = rx2*rx2 + ry2*ry2;
 
-        //------ set reflection flag sgn to avoid branch problems with arctan
-        if(io>=1 && io<=n)
-        {
-            //------- no problem on airfoil surface
-            sgn = 1.0;
-        }
-        else
-        {
-            //------- make sure arctan falls between  -/+  pi/2
-            sgn = sign(1.0,yy);
-        }
+            //------ set reflection flag sgn to avoid branch problems with arctan
+            if(io>=1 && io<=n)
+            {
+                //------- no problem on airfoil surface
+                sgn = 1.0;
+            }
+            else
+            {
+                //------- make sure arctan falls between  -/+  pi/2
+                sgn = sign(1.0,yy);
+            }
 
-        //------ set log(r^2) and arctan(x/y), correcting for reflection if any
-        if(io!=jo && rsq1>0.0)
-        {
-            logr12 = log(rsq1);
-            theta1 = atan2(sgn*x1,sgn*yy) + (0.5- 0.5*sgn)*PI;
-        }
-        else
-        {
-            logr12 = 0.0;
-            theta1 = 0.0;
-        }
+            //------ set log(r^2) and arctan(x/y), correcting for reflection if any
+            if(io!=jo && rsq1>0.0)
+            {
+                logr12 = log(rsq1);
+                theta1 = atan2(sgn*x1,sgn*yy) + (0.5- 0.5*sgn)*PI;
+            }
+            else
+            {
+                logr12 = 0.0;
+                theta1 = 0.0;
+            }
 
-        if(io!=jp && rsq2>0.0)
-        {
-            logr22 = log(rsq2);
-            theta2 = atan2(sgn*x2,sgn*yy) + (0.5- 0.5*sgn)*PI;
-        }
-        else
-        {
-            logr22 = 0.0;
-            theta2 = 0.0;
-        }
+            if(io!=jp && rsq2>0.0)
+            {
+                logr22 = log(rsq2);
+                theta2 = atan2(sgn*x2,sgn*yy) + (0.5- 0.5*sgn)*PI;
+            }
+            else
+            {
+                logr22 = 0.0;
+                theta2 = 0.0;
+            }
 
-        x1i = sx*nxi + sy*nyi;
-        x2i = sx*nxi + sy*nyi;
-        yyi = sx*nyi - sy*nxi;
+            x1i = sx*nxi + sy*nyi;
+            x2i = sx*nxi + sy*nyi;
+            yyi = sx*nyi - sy*nxi;
 
-        if(geolin)
-        {
-            nxo = nx[jo];
-            nyo = ny[jo];
-            nxp = nx[jp];
-            nyp = ny[jp];
+            if(geolin)
+            {
+                nxo = nx[jo];
+                nyo = ny[jo];
+                nxp = nx[jp];
+                nyp = ny[jp];
 
-            x1o =-((rx1-x1*sx)*nxo + (ry1-x1*sy)*nyo)/dso-(sx*nxo+sy*nyo);
-            x1p = ((rx1-x1*sx)*nxp + (ry1-x1*sy)*nyp)/dso;
-            x2o =-((rx2-x2*sx)*nxo + (ry2-x2*sy)*nyo)/dso;
-            x2p = ((rx2-x2*sx)*nxp + (ry2-x2*sy)*nyp)/dso-(sx*nxp+sy*nyp);
-            yyo = ((rx1+x1*sy)*nyo - (ry1-x1*sx)*nxo)/dso-(sx*nyo-sy*nxo);
-            yyp =-((rx1-x1*sy)*nyp - (ry1+x1*sx)*nxp)/dso;
-        }
+                x1o =-((rx1-x1*sx)*nxo + (ry1-x1*sy)*nyo)/dso-(sx*nxo+sy*nyo);
+                x1p = ((rx1-x1*sx)*nxp + (ry1-x1*sy)*nyp)/dso;
+                x2o =-((rx2-x2*sx)*nxo + (ry2-x2*sy)*nyo)/dso;
+                x2p = ((rx2-x2*sx)*nxp + (ry2-x2*sy)*nyp)/dso-(sx*nxp+sy*nyp);
+                yyo = ((rx1+x1*sy)*nyo - (ry1-x1*sx)*nxo)/dso-(sx*nyo-sy*nxo);
+                yyp =-((rx1-x1*sy)*nyp - (ry1+x1*sx)*nxp)/dso;
+            }
 
-        if (jo==n) goto stop11;
+            if (jo!=n) {
+                // was if(jo==n) gooto stop10
 
-        if(siglin)
-        {
-            //------- set up midpoint quantities
-            x0 = 0.5*(x1+x2);
-            rsq0 = x0*x0 + yy*yy;
-            logr0 = log(rsq0);
-            theta0 = atan2(sgn*x0,sgn*yy) + (0.5- 0.5*sgn)*PI;
+                if(siglin)
+                {
+                    //------- set up midpoint quantities
+                    x0 = 0.5*(x1+x2);
+                    rsq0 = x0*x0 + yy*yy;
+                    logr0 = log(rsq0);
+                    theta0 = atan2(sgn*x0,sgn*yy) + (0.5- 0.5*sgn)*PI;
 
-            //------- calculate source contribution to psi    for  1-0  half-panel
-            dxinv = 1.0/(x1-x0);
-            psum = x0*(theta0-apan) - x1*(theta1-apan) + 0.5*yy*(logr12-logr0);
-            pdif = ((x1+x0)*psum + rsq1*(theta1-apan) - rsq0*(theta0-apan)+ (x0-x1)*yy) * dxinv;
+                    //------- calculate source contribution to psi    for  1-0  half-panel
+                    dxinv = 1.0/(x1-x0);
+                    psum = x0*(theta0-apan) - x1*(theta1-apan) + 0.5*yy*(logr12-logr0);
+                    pdif = ((x1+x0)*psum + rsq1*(theta1-apan) - rsq0*(theta0-apan)+ (x0-x1)*yy) * dxinv;
 
-            psx1 =    -(theta1-apan);
-            psx0 =      theta0-apan;
-            psyy =    0.5*(logr12-logr0);
+                    psx1 =    -(theta1-apan);
+                    psx0 =      theta0-apan;
+                    psyy =    0.5*(logr12-logr0);
 
-            pdx1 = ((x1+x0)*psx1 + psum + 2.0*x1*(theta1-apan) - pdif) * dxinv;
-            pdx0 = ((x1+x0)*psx0 + psum - 2.0*x0*(theta0-apan) + pdif) * dxinv;
-            pdyy = ((x1+x0)*psyy + 2.0*(x0-x1 + yy*(theta1-theta0))  ) * dxinv;
+                    pdx1 = ((x1+x0)*psx1 + psum + 2.0*x1*(theta1-apan) - pdif) * dxinv;
+                    pdx0 = ((x1+x0)*psx0 + psum - 2.0*x0*(theta0-apan) + pdif) * dxinv;
+                    pdyy = ((x1+x0)*psyy + 2.0*(x0-x1 + yy*(theta1-theta0))  ) * dxinv;
 
-            dsm = sqrt((x[jp]-x[jm])*(x[jp]-x[jm]) + (y[jp]-y[jm])*(y[jp]-y[jm]));
-            dsim = 1.0/dsm;
+                    dsm = sqrt((x[jp]-x[jm])*(x[jp]-x[jm]) + (y[jp]-y[jm])*(y[jp]-y[jm]));
+                    dsim = 1.0/dsm;
 
-            ssum = (sig[jp] - sig[jo])/dso + (sig[jp] - sig[jm])*dsim;
-            sdif = (sig[jp] - sig[jo])/dso - (sig[jp] - sig[jm])*dsim;
+                    ssum = (sig[jp] - sig[jo])/dso + (sig[jp] - sig[jm])*dsim;
+                    sdif = (sig[jp] - sig[jo])/dso - (sig[jp] - sig[jm])*dsim;
 
-            psi += qopi*(psum*ssum + pdif*sdif);
+                    psi += qopi*(psum*ssum + pdif*sdif);
 
-            //------- dpsi/dm
-            dzdm[jm] += qopi*(-psum*dsim + pdif*dsim);
-            dzdm[jo] += qopi*(-psum/dso - pdif/dso);
-            dzdm[jp] += qopi*( psum*(dsio+dsim) + pdif*(dsio-dsim));
+                    //------- dpsi/dm
+                    dzdm[jm] += qopi*(-psum*dsim + pdif*dsim);
+                    dzdm[jo] += qopi*(-psum/dso - pdif/dso);
+                    dzdm[jp] += qopi*( psum*(dsio+dsim) + pdif*(dsio-dsim));
 
-            //------- dpsi/dni
-            psni = psx1*x1i + psx0*(x1i+x2i)*0.5 + psyy*yyi;
-            pdni = pdx1*x1i + pdx0*(x1i+x2i)*0.5 + pdyy*yyi;
-            psi_ni = psi_ni + qopi*(psni*ssum + pdni*sdif);
+                    //------- dpsi/dni
+                    psni = psx1*x1i + psx0*(x1i+x2i)*0.5 + psyy*yyi;
+                    pdni = pdx1*x1i + pdx0*(x1i+x2i)*0.5 + pdyy*yyi;
+                    psi_ni = psi_ni + qopi*(psni*ssum + pdni*sdif);
 
-            qtanm = qtanm + qopi*(psni*ssum + pdni*sdif);
+                    qtanm = qtanm + qopi*(psni*ssum + pdni*sdif);
 
-            dqdm[jm] += qopi*(-psni*dsim + pdni*dsim);
-            dqdm[jo] += qopi*(-psni/dso - pdni/dso);
-            dqdm[jp] += qopi*( psni*(dsio+dsim)+ pdni*(dsio-dsim));
+                    dqdm[jm] += qopi*(-psni*dsim + pdni*dsim);
+                    dqdm[jo] += qopi*(-psni/dso - pdni/dso);
+                    dqdm[jp] += qopi*( psni*(dsio+dsim)+ pdni*(dsio-dsim));
 
 
-            //------- calculate source contribution to psi    for  0-2  half-panel
-            dxinv = 1.0/(x0-x2);
-            psum = x2*(theta2-apan) - x0*(theta0-apan) + 0.5*yy*(logr0-logr22);
-            pdif = ((x0+x2)*psum + rsq0*(theta0-apan) - rsq2*(theta2-apan)+ (x2-x0)*yy) * dxinv;
+                    //------- calculate source contribution to psi    for  0-2  half-panel
+                    dxinv = 1.0/(x0-x2);
+                    psum = x2*(theta2-apan) - x0*(theta0-apan) + 0.5*yy*(logr0-logr22);
+                    pdif = ((x0+x2)*psum + rsq0*(theta0-apan) - rsq2*(theta2-apan)+ (x2-x0)*yy) * dxinv;
 
-            psx0 =  -(theta0-apan);
-            psx2 =      theta2-apan;
-            psyy =    0.5*(logr0-logr22);
+                    psx0 =  -(theta0-apan);
+                    psx2 =      theta2-apan;
+                    psyy =    0.5*(logr0-logr22);
 
-            pdx0 = ((x0+x2)*psx0 + psum + 2.0*x0*(theta0-apan) - pdif) * dxinv;
-            pdx2 = ((x0+x2)*psx2 + psum - 2.0*x2*(theta2-apan) + pdif) * dxinv;
-            pdyy = ((x0+x2)*psyy + 2.0*(x2-x0 + yy*(theta0-theta2))     ) * dxinv;
+                    pdx0 = ((x0+x2)*psx0 + psum + 2.0*x0*(theta0-apan) - pdif) * dxinv;
+                    pdx2 = ((x0+x2)*psx2 + psum - 2.0*x2*(theta2-apan) + pdif) * dxinv;
+                    pdyy = ((x0+x2)*psyy + 2.0*(x2-x0 + yy*(theta0-theta2))     ) * dxinv;
 
-            dsp = sqrt((x[jq]-x[jo])*(x[jq]-x[jo]) + (y[jq]-y[jo])*(y[jq]-y[jo]));
-            dsip = 1.0/dsp;
+                    dsp = sqrt((x[jq]-x[jo])*(x[jq]-x[jo]) + (y[jq]-y[jo])*(y[jq]-y[jo]));
+                    dsip = 1.0/dsp;
 
-            ssum = (sig[jq] - sig[jo])*dsip + (sig[jp] - sig[jo])/dso;
-            sdif = (sig[jq] - sig[jo])*dsip - (sig[jp] - sig[jo])/dso;
+                    ssum = (sig[jq] - sig[jo])*dsip + (sig[jp] - sig[jo])/dso;
+                    sdif = (sig[jq] - sig[jo])*dsip - (sig[jp] - sig[jo])/dso;
 
-            psi = psi + qopi*(psum*ssum + pdif*sdif);
+                    psi = psi + qopi*(psum*ssum + pdif*sdif);
 
-            //------- dpsi/dm
-            dzdm[jo] += qopi*(-psum*(dsip+dsio)- pdif*(dsip-dsio));
-            dzdm[jp] += qopi*( psum/dso - pdif/dso);
-            dzdm[jq] += qopi*( psum*dsip + pdif*dsip);
+                    //------- dpsi/dm
+                    dzdm[jo] += qopi*(-psum*(dsip+dsio)- pdif*(dsip-dsio));
+                    dzdm[jp] += qopi*( psum/dso - pdif/dso);
+                    dzdm[jq] += qopi*( psum*dsip + pdif*dsip);
 
-            //------- dpsi/dni
-            psni = psx0*(x1i+x2i)*0.5 + psx2*x2i + psyy*yyi;
-            pdni = pdx0*(x1i+x2i)*0.5 + pdx2*x2i + pdyy*yyi;
-            psi_ni = psi_ni + qopi*(psni*ssum + pdni*sdif);
+                    //------- dpsi/dni
+                    psni = psx0*(x1i+x2i)*0.5 + psx2*x2i + psyy*yyi;
+                    pdni = pdx0*(x1i+x2i)*0.5 + pdx2*x2i + pdyy*yyi;
+                    psi_ni = psi_ni + qopi*(psni*ssum + pdni*sdif);
 
-            qtanm = qtanm + qopi*(psni*ssum + pdni*sdif);
+                    qtanm = qtanm + qopi*(psni*ssum + pdni*sdif);
 
-            dqdm[jo] += qopi*(-psni*(dsip+dsio)- pdni*(dsip-dsio));
-            dqdm[jp] += qopi*( psni/dso - pdni/dso);
-            dqdm[jq] += qopi*( psni*dsip + pdni*dsip);
-        }
+                    dqdm[jo] += qopi*(-psni*(dsip+dsio)- pdni*(dsip-dsio));
+                    dqdm[jp] += qopi*( psni/dso - pdni/dso);
+                    dqdm[jq] += qopi*( psni*dsip + pdni*dsip);
+                }
 
-        //------ calculate vortex panel contribution to psi
-        dxinv = 1.0/(x1-x2);
-        psis = 0.5*x1*logr12 - 0.5*x2*logr22 + x2 - x1 + yy*(theta1-theta2);
-        psid = ((x1+x2)*psis + 0.5*(rsq2*logr22-rsq1*logr12 + x1*x1-x2*x2))*dxinv;
+                //------ calculate vortex panel contribution to psi
+                dxinv = 1.0/(x1-x2);
+                psis = 0.5*x1*logr12 - 0.5*x2*logr22 + x2 - x1 + yy*(theta1-theta2);
+                psid = ((x1+x2)*psis + 0.5*(rsq2*logr22-rsq1*logr12 + x1*x1-x2*x2))*dxinv;
 
-        psx1 = 0.5*logr12;
-        psx2 = -.5*logr22;
-        psyy = theta1-theta2;
+                psx1 = 0.5*logr12;
+                psx2 = -.5*logr22;
+                psyy = theta1-theta2;
 
-        pdx1 = ((x1+x2)*psx1 + psis - x1*logr12 - psid)*dxinv;
-        pdx2 = ((x1+x2)*psx2 + psis + x2*logr22 + psid)*dxinv;
-        pdyy = ((x1+x2)*psyy - yy*(logr12-logr22)     )*dxinv;
+                pdx1 = ((x1+x2)*psx1 + psis - x1*logr12 - psid)*dxinv;
+                pdx2 = ((x1+x2)*psx2 + psis + x2*logr22 + psid)*dxinv;
+                pdyy = ((x1+x2)*psyy - yy*(logr12-logr22)     )*dxinv;
 
-        gsum1 = gamu[jp][1] + gamu[jo][1];
-        gsum2 = gamu[jp][2] + gamu[jo][2];
-        gdif1 = gamu[jp][1] - gamu[jo][1];
-        gdif2 = gamu[jp][2] - gamu[jo][2];
+                gsum1 = gamu[jp][1] + gamu[jo][1];
+                gsum2 = gamu[jp][2] + gamu[jo][2];
+                gdif1 = gamu[jp][1] - gamu[jo][1];
+                gdif2 = gamu[jp][2] - gamu[jo][2];
 
-        gsum = gam[jp] + gam[jo];
-        gdif = gam[jp] - gam[jo];
+                gsum = gam[jp] + gam[jo];
+                gdif = gam[jp] - gam[jo];
 
-        psi += qopi*(psis*gsum + psid*gdif);
+                psi += qopi*(psis*gsum + psid*gdif);
 
-        //------ dpsi/dgam
-        dzdg[jo] += qopi*(psis-psid);
-        dzdg[jp] += qopi*(psis+psid);
+                //------ dpsi/dgam
+                dzdg[jo] += qopi*(psis-psid);
+                dzdg[jp] += qopi*(psis+psid);
 
-        //------ dpsi/dni
-        psni = psx1*x1i + psx2*x2i + psyy*yyi;
-        pdni = pdx1*x1i + pdx2*x2i + pdyy*yyi;
-        psi_ni += qopi*(gsum*psni + gdif*pdni);
+                //------ dpsi/dni
+                psni = psx1*x1i + psx2*x2i + psyy*yyi;
+                pdni = pdx1*x1i + pdx2*x2i + pdyy*yyi;
+                psi_ni += qopi*(gsum*psni + gdif*pdni);
 
-        qtan1 += qopi*(gsum1*psni + gdif1*pdni);
-        qtan2 += qopi*(gsum2*psni + gdif2*pdni);
+                qtan1 += qopi*(gsum1*psni + gdif1*pdni);
+                qtan2 += qopi*(gsum2*psni + gdif2*pdni);
 
-        dqdg[jo] += qopi*(psni - pdni);
-        dqdg[jp] += qopi*(psni + pdni);
+                dqdg[jo] += qopi*(psni - pdni);
+                dqdg[jp] += qopi*(psni + pdni);
 
-        if(geolin)
-        {
-            //------- dpsi/dn
-            dzdn[jo] +=   qopi*gsum*(psx1*x1o + psx2*x2o + psyy*yyo)
-                        + qopi*gdif*(pdx1*x1o + pdx2*x2o + pdyy*yyo);
-            dzdn[jp] +=   qopi*gsum*(psx1*x1p + psx2*x2p + psyy*yyp)
-                        + qopi*gdif*(pdx1*x1p + pdx2*x2p + pdyy*yyp);
+                if(geolin) {
+                    //------- dpsi/dn
+                    dzdn[jo] +=   qopi*gsum*(psx1*x1o + psx2*x2o + psyy*yyo)
+                                + qopi*gdif*(pdx1*x1o + pdx2*x2o + pdyy*yyo);
+                    dzdn[jp] +=   qopi*gsum*(psx1*x1p + psx2*x2p + psyy*yyp)
+                                + qopi*gdif*(pdx1*x1p + pdx2*x2p + pdyy*yyp);
 
-            //------- dpsi/dp
-            z_qdof0 += qopi*((psis-psid)*qf0[jo] + (psis+psid)*qf0[jp]);
-            z_qdof1 += qopi*((psis-psid)*qf1[jo] + (psis+psid)*qf1[jp]);
-            z_qdof2 += qopi*((psis-psid)*qf2[jo] + (psis+psid)*qf2[jp]);
-            z_qdof3 += qopi*((psis-psid)*qf3[jo] + (psis+psid)*qf3[jp]);
-        }
-stop10:
-        int nothing=1;      (void)nothing;    //c++ doesn't like gotos
+                    //------- dpsi/dp
+                    z_qdof0 += qopi*((psis-psid)*qf0[jo] + (psis+psid)*qf0[jp]);
+                    z_qdof1 += qopi*((psis-psid)*qf1[jo] + (psis+psid)*qf1[jp]);
+                    z_qdof2 += qopi*((psis-psid)*qf2[jo] + (psis+psid)*qf2[jp]);
+                    z_qdof3 += qopi*((psis-psid)*qf3[jo] + (psis+psid)*qf3[jp]);
+                }
+            }
+        } // stop10
     }
 
-stop11:
-    psig = 0.5*yy*(logr12-logr22) + x2*(theta2-apan) - x1*(theta1-apan);
-    pgam = 0.5*x1*logr12 - 0.5*x2*logr22 + x2-x1 + yy*(theta1-theta2);
+    if (!skip) {
+        // stop11
+        psig = 0.5*yy*(logr12-logr22) + x2*(theta2-apan) - x1*(theta1-apan);
+        pgam = 0.5*x1*logr12 - 0.5*x2*logr22 + x2-x1 + yy*(theta1-theta2);
 
-    psigx1 = -(theta1-apan);
-    psigx2 =   theta2-apan;
-    psigyy =  0.5*(logr12-logr22);
-    pgamx1 =  0.5*logr12;
-    pgamx2 = -0.5*logr22;
-    pgamyy = theta1-theta2;
+        psigx1 = -(theta1-apan);
+        psigx2 =   theta2-apan;
+        psigyy =  0.5*(logr12-logr22);
+        pgamx1 =  0.5*logr12;
+        pgamx2 = -0.5*logr22;
+        pgamyy = theta1-theta2;
 
-    psigni = psigx1*x1i + psigx2*x2i + psigyy*yyi;
-    pgamni = pgamx1*x1i + pgamx2*x2i + pgamyy*yyi;
+        psigni = psigx1*x1i + psigx2*x2i + psigyy*yyi;
+        pgamni = pgamx1*x1i + pgamx2*x2i + pgamyy*yyi;
 
-    //---- TE panel source and vortex strengths
-    sigte1 =  0.5*scs*(gamu[jp][1] - gamu[jo][1]);
-    sigte2 =  0.5*scs*(gamu[jp][2] - gamu[jo][2]);
-    gamte1 = -0.5*sds*(gamu[jp][1] - gamu[jo][1]);
-    gamte2 = -0.5*sds*(gamu[jp][2] - gamu[jo][2]);
+        //---- TE panel source and vortex strengths
+        sigte1 =  0.5*scs*(gamu[jp][1] - gamu[jo][1]);
+        sigte2 =  0.5*scs*(gamu[jp][2] - gamu[jo][2]);
+        gamte1 = -0.5*sds*(gamu[jp][1] - gamu[jo][1]);
+        gamte2 = -0.5*sds*(gamu[jp][2] - gamu[jo][2]);
 
-    sigte =  0.5*scs*(gam[jp] - gam[jo]);
-    gamte = -0.5*sds*(gam[jp] - gam[jo]);
+        sigte =  0.5*scs*(gam[jp] - gam[jo]);
+        gamte = -0.5*sds*(gam[jp] - gam[jo]);
 
-    //---- TE panel contribution to psi
-    psi += hopi*(psig*sigte + pgam*gamte);
+        //---- TE panel contribution to psi
+        psi += hopi*(psig*sigte + pgam*gamte);
 
-    //---- dpsi/dgam
-    dzdg[jo] += - hopi*psig*scs*0.5;
-    dzdg[jp] += + hopi*psig*scs*0.5;
+        //---- dpsi/dgam
+        dzdg[jo] += - hopi*psig*scs*0.5;
+        dzdg[jp] += + hopi*psig*scs*0.5;
 
-    dzdg[jo] += + hopi*pgam*sds*0.5;
-    dzdg[jp] += - hopi*pgam*sds*0.5;
+        dzdg[jo] += + hopi*pgam*sds*0.5;
+        dzdg[jp] += - hopi*pgam*sds*0.5;
 
-    //---- dpsi/dni
-    psi_ni += hopi*(psigni*sigte + pgamni*gamte);
+        //---- dpsi/dni
+        psi_ni += hopi*(psigni*sigte + pgamni*gamte);
 
-    qtan1 += hopi*(psigni*sigte1 + pgamni*gamte1);
-    qtan2 += hopi*(psigni*sigte2 + pgamni*gamte2);
+        qtan1 += hopi*(psigni*sigte1 + pgamni*gamte1);
+        qtan2 += hopi*(psigni*sigte2 + pgamni*gamte2);
 
-    dqdg[jo] += - hopi*(psigni*0.5*scs - pgamni*0.5*sds);
-    dqdg[jp] += + hopi*(psigni*0.5*scs - pgamni*0.5*sds);
+        dqdg[jo] += - hopi*(psigni*0.5*scs - pgamni*0.5*sds);
+        dqdg[jp] += + hopi*(psigni*0.5*scs - pgamni*0.5*sds);
 
-    if(geolin)
-    {
-        //----- dpsi/dn
-        dzdn[jo] +=   hopi*(psigx1*x1o + psigx2*x2o + psigyy*yyo)*sigte
-                + hopi*(pgamx1*x1o + pgamx2*x2o + pgamyy*yyo)*gamte;
-        dzdn[jp] +=   hopi*(psigx1*x1p + psigx2*x2p + psigyy*yyp)*sigte
-                + hopi*(pgamx1*x1p + pgamx2*x2p + pgamyy*yyp)*gamte;
+        if(geolin) {
+            //----- dpsi/dn
+            dzdn[jo] +=   hopi*(psigx1*x1o + psigx2*x2o + psigyy*yyo)*sigte
+                    + hopi*(pgamx1*x1o + pgamx2*x2o + pgamyy*yyo)*gamte;
+            dzdn[jp] +=   hopi*(psigx1*x1p + psigx2*x2p + psigyy*yyp)*sigte
+                    + hopi*(pgamx1*x1p + pgamx2*x2p + pgamyy*yyp)*gamte;
 
-        //----- dpsi/dp
-        z_qdof0 +=   hopi*psig*0.5*(qf0[jp]-qf0[jo])*scs
-                - hopi*pgam*0.5*(qf0[jp]-qf0[jo])*sds;
-        z_qdof1 +=   hopi*psig*0.5*(qf1[jp]-qf1[jo])*scs
-                - hopi*pgam*0.5*(qf1[jp]-qf1[jo])*sds;
-        z_qdof2 +=   hopi*psig*0.5*(qf2[jp]-qf2[jo])*scs
-                - hopi*pgam*0.5*(qf2[jp]-qf2[jo])*sds;
-        z_qdof3 +=   hopi*psig*0.5*(qf3[jp]-qf3[jo])*scs
-                - hopi*pgam*0.5*(qf3[jp]-qf3[jo])*sds;
+            //----- dpsi/dp
+            z_qdof0 +=   hopi*psig*0.5*(qf0[jp]-qf0[jo])*scs
+                    - hopi*pgam*0.5*(qf0[jp]-qf0[jo])*sds;
+            z_qdof1 +=   hopi*psig*0.5*(qf1[jp]-qf1[jo])*scs
+                    - hopi*pgam*0.5*(qf1[jp]-qf1[jo])*sds;
+            z_qdof2 +=   hopi*psig*0.5*(qf2[jp]-qf2[jo])*scs
+                    - hopi*pgam*0.5*(qf2[jp]-qf2[jo])*sds;
+            z_qdof3 +=   hopi*psig*0.5*(qf3[jp]-qf3[jo])*scs
+                    - hopi*pgam*0.5*(qf3[jp]-qf3[jo])*sds;
+        }
     }
-stop12:
 
     //**** freestream terms
     psi += qinf*(cosa*yi - sina*xi);
@@ -6534,13 +6541,11 @@ for(int i=1; i<=n; i++)
  *     sets inviscid panel tangential velocity for
  *      current alpha.
  * -------------------------------------------------------- */
-bool XFoil::qiset()
-{
+bool XFoil::qiset() {
     cosa = cos(alfa);
     sina = sin(alfa);
 
-    for (int i=1; i<=n+nw; i++)
-    {
+    for (int i=1; i<=n+nw; i++) {
         qinv  [i] =  cosa*qinvu[i][1] + sina*qinvu[i][2];
         qinv_a[i] = -sina*qinvu[i][1] + cosa*qinvu[i][2];
     }
@@ -7213,7 +7218,7 @@ bool XFoil::setbl()
 
             //---- check for transition and set tran, xt, etc. if found
             if(tran) {
-                trchek();
+                transition_check();
                 ami = ampl2;
             }
 
@@ -7585,31 +7590,35 @@ bool XFoil::setexp(double s[], double ds1, double smax, int nn)
         if(nex==2)    ratio = -ccc/bbb  +  1.0;
         else  ratio = (-bbb + sqrt(disc))/(2.0*aaa)  +  1.0;
     }
-    if(ratio==1.0) goto stop11;
+    if(ratio!=1.0) {
 
-    //-- newton iteration for actual geometric ratio
-    for (iter=1; iter<=100; iter++)
-    {
-        sigman = (pow(ratio,double(nex)) - 1.0) / (ratio - 1.0);
-        res = pow(sigman,rni) - pow(sigma,rni);
-        dresdr = rni*pow(sigman,rni)
-                * (rnex*pow(ratio,double(nex-1)) - sigman)
-                / (pow(ratio,double(nex)) - 1.0);
+        //-- newton iteration for actual geometric ratio
+        for (iter=1; iter<=100; iter++) {
+            sigman = (pow(ratio,double(nex)) - 1.0) / (ratio - 1.0);
+            res = pow(sigman,rni) - pow(sigma,rni);
+            dresdr = rni*pow(sigman,rni)
+                    * (rnex*pow(ratio,double(nex-1)) - sigman)
+                    / (pow(ratio,double(nex)) - 1.0);
 
-        dratio = -res/dresdr;
-        ratio = ratio + dratio;
+            dratio = -res/dresdr;
+            ratio = ratio + dratio;
 
-        if(fabs(dratio) < 1.0e-5)     goto stop11;
+            if(fabs(dratio) < 1.0e-5){
+                break;
+            }
+
+        }
+
+        if(iter == 100) {
+            str = "Setexp: Convergence failed.  Continuing anyway ...\n";
+            this->write(str, true);
+        }
 
     }
 
 
-    str = "Setexp: Convergence failed.  Continuing anyway ...\n";
-    this->write(str, true);
-
 
     //-- set up stretched array using converged geometric ratio
-stop11:
     s[1] = 0.0;
     ds = ds1;
     for (n=2; n<= nn; n++)
@@ -8557,7 +8566,7 @@ bool XFoil::tesys(double cte, double tte, double dte){
 
 
 
-bool XFoil::trchek()
+bool XFoil::transition_check()
 {
     //----------------------------------------------------------------
     //     new second-order version:  december 1994.
@@ -8584,6 +8593,7 @@ bool XFoil::trchek()
     //
     //----------------------------------------------------------------
     std::string str;
+    bool converged = false;
 
     int itam=0;
     double ax_hk1=0.0, ax_t1=0.0, ax_a1=0.0, ax_hk2=0.0, ax_t2=0.0, ax_rt2=0.0, ax_a2=0.0;
@@ -8614,8 +8624,7 @@ bool XFoil::trchek()
     ampl2 = ampl1 + ax*(x2-x1);
 
     //---- solve implicit system for amplification ampl2
-    for(itam=1; itam<=30;itam++)
-    {
+    for(itam=1; itam<=30;itam++) {
 
         //---- define weighting factors wf1,wf2 for defining "t" quantities from 1,2
         if(ampl2 <= amcrit)
@@ -8725,7 +8734,10 @@ bool XFoil::trchek()
 
 
         //---- punch out early if there is no amplification here
-        if(ax <= 0.0) goto stop101;
+        if(ax <= 0.0) {
+            converged = true;
+            break;
+        }
 
         //---- set sensitivity of ax(a2)
         ax_a2 = (ax_hkt*hkt_tt + ax_tt + ax_rtt*rtt_tt)*tt_a2
@@ -8749,7 +8761,10 @@ bool XFoil::trchek()
 
 
         //---- check if converged
-        if(fabs(da2) < daeps) goto stop101;
+        if(fabs(da2) < daeps){
+            converged = true;
+            break;  // amplification loop
+        }
 
         if((ampl2>amcrit && ampl2+rlx*da2<amcrit)||
                 (ampl2<amcrit && ampl2+rlx*da2>amcrit)    )
@@ -8760,11 +8775,14 @@ bool XFoil::trchek()
             ampl2 = ampl2 + rlx*da2;
     }
 
-    //TRACE("trchek2 - n2 convergence failed\n");
-    str = "trchek2 - n2 convergence failed\n";
-    this->write(str, true);
-    if(s_bCancel) return false;
-stop101:
+    if(!converged) {
+        //TRACE("transition_check2 - n2 convergence failed\n");
+        str = "transition_check2 - n2 convergence failed\n";
+        this->write(str, true);
+        if(s_bCancel) return false;
+
+    }
+    //stop101
 
     //---- test for free or forced transition
     trfree = (ampl2 >= amcrit);
@@ -9995,6 +10013,7 @@ int XFoil::arefine(double x[],double y[], double s[], double xs[], double ys[],
     //      real x(*), y(*), s(*), xs(*), ys(*)
     //      real xnew(ndim), ynew(ndim)
     bool lref=false;
+    bool error=false;
     double atolr=0, dxm=0, dym=0,  dxp=0, dyp=0, crsp=0, dotp=0, aseg=0, smid=0, xk=0, yk=0;
     int k=0;
     //    int im, ip;
@@ -10005,8 +10024,7 @@ int XFoil::arefine(double x[],double y[], double s[], double xs[], double ys[],
     xnew[k] = x[1];
     ynew[k] = y[1];
 
-    for( int i = 2; i<=n-1; i++)
-    {
+    for(int i=2; i<=n-1; i++) {
         //        im = i-1;
         //        ip = i+1;
 
@@ -10017,11 +10035,11 @@ int XFoil::arefine(double x[],double y[], double s[], double xs[], double ys[],
 
         crsp = dxm*dyp - dym*dxp;
         dotp = dxm*dxp + dym*dyp;
-        if(crsp==0.0 && dotp==0.0)
+        if(crsp==0.0 && dotp==0.0) {
             aseg = 0.0;
-        else
+        } else {
             aseg = atan2(crsp, dotp );
-
+        }
 
         lref = fabs(aseg) > atolr;
 
@@ -10032,7 +10050,10 @@ int XFoil::arefine(double x[],double y[], double s[], double xs[], double ys[],
             yk = seval(smid,y,ys,s,n);
             if(xk>=x1 && xk<=x2) {
                 k = k + 1;
-                if(k > ndim)  goto stop90;
+                if(k > ndim){
+                    error = true;
+                    break;
+                }
                 xnew[k] = xk;
                 ynew[k] = yk;
             }
@@ -10040,7 +10061,12 @@ int XFoil::arefine(double x[],double y[], double s[], double xs[], double ys[],
 
         //------ add the node itself
         k = k + 1;
-        if(k > ndim)  goto stop90;
+
+        if(k > ndim){
+            error = true;
+            break;
+        }
+
         xnew[k] = x[i];
         ynew[k] = y[i];
 
@@ -10051,27 +10077,36 @@ int XFoil::arefine(double x[],double y[], double s[], double xs[], double ys[],
             yk = seval(smid,y,ys,s,n);
             if(xk>=x1 && xk<=x2) {
                 k = k + 1;
-                if(k > ndim)  goto stop90;
+                if(k > ndim){
+                    error = true;
+                    break;
+                    // was goto90
+                }
                 xnew[k] = xk;
                 ynew[k] = yk;
             }
         }
     }
 
+    if (error || k==ndim) {
+        //stop90
+        std::string str = "sdouble:  Arrays will overflow.  No action taken.\n";
+        this->write(str, true);
+
+        //    nnew = 0;
+        return 0;
+
+    }
+
     k = k + 1;
-    if(k>ndim) goto stop90;
     xnew[k] = x[n];
     ynew[k] = y[n];
 
     //    nnew = k;
     return k;
 
-stop90: 
-    std::string str = "sdouble:  Arrays will overflow.  No action taken.\n";
-    this->write(str, true);
+    //stop90 was here
 
-    //    nnew = 0;
-    return 0;
 }
 
 
@@ -13089,4 +13124,3 @@ void XFoil::createXBL()
     for(int iblw=1; iblw <= nbl[2]-iblte[2]; iblw++)
         xbl[iblte[1]+iblw][1] = xbl[iblte[2]+iblw][2];
 }
-

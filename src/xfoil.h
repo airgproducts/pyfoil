@@ -262,7 +262,7 @@ private:
     bool stmove();
     bool tecalc();
     bool tesys(double cte, double tte, double dte);
-    bool trchek();
+    bool transition_check();
     bool trdif();
     bool trisol(double a[],double b[], double c[], double d[], int kk);
     bool ueset();

@@ -47,6 +47,8 @@ class Solver {
 
         bool initialize_bl_auto = true;
 
+        void set_debug(bool debug);
+
     private:
         Result solve();
         Result getResult();

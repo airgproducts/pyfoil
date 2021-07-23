@@ -81,16 +81,18 @@ with open("README.md") as readme_file:
     long_description = readme_file.read()
 
 setup(
-    name='xfoil',
+    name='pyfoil',
     version=version,
-    description="xfoil for python",
+    packages=["pyfoil"],
+    description="python library for airfoil generation, modification and analysis (xfoil included)",
     ext_modules=[CMakeExtension('.')],
     cmdclass={"build_ext": CMakeBuild},
-    license='MIT',
+    license='GPL-V3',
     long_description=long_description,
     install_requires=[],
+    requires=["euklid", "pandas"],
     author='airgproducts',
-    url='http://github.com/airgproducts/xfoil',
+    url='http://github.com/airgproducts/pyfoil',
     #test_suite="tests.test_suite",
     #include_package_data=True
 )

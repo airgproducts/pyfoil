@@ -2523,7 +2523,10 @@ bool XFoil::cpcalc(int n, double q[], double qinf, double minf, double cp[])
 
 void XFoil::write(std::string str, bool bFullReport)
 {
-    std::cout << str << std::endl;
+    if (this->debug) {
+        std::cout << str << std::endl;
+    }
+    // TODO: logger!
     //if(!bFullReport && !s_bFullReport) return;
     //if(!m_pOutStream) return;
     //*m_pOutStream << str;

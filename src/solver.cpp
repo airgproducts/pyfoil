@@ -260,6 +260,10 @@ std::vector<Result> Solver::run_aoa(std::vector<double> aoa) {
 */
 }
 
+void Solver::set_debug(bool debug) {
+    this->solver.debug = debug;
+}
+
 Result Solver::getResult() { //Foil *pFoil
     auto pXFoil = &(this->solver);
 

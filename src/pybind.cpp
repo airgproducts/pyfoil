@@ -41,6 +41,10 @@ PYBIND11_MODULE(xfoil, m) {
         .def("run_aoa", py::overload_cast<double>(&Solver::run_aoa))
         .def("run_aoa", py::overload_cast<std::vector<double>>(&Solver::run_aoa))
 
+        .def("set_debug", [](Solver& solver, bool debug) {
+            solver.set_debug(debug);
+        })
+
         .def_readwrite("viscous", &Solver::viscous)
         .def_readwrite("xtr_top", &Solver::xtr_top)
         .def_readwrite("xtr_bottom", &Solver::xtr_bottom)

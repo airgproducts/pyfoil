@@ -1,10 +1,10 @@
 #! /bin/python
 
-import openglider.airfoil as foil
-import xfoil
+import pyfoil
 
-solver = xfoil.Solver()
-airfoil = foil.Profile2D.compute_naca(1234)
+foil = pyfoil.Airfoil.compute_naca(1222)
+result=foil.get_polar(0, 20)
 
-solver.load(airfoil.curve.tolist())
-solver.run_aoa([x*3.141/180 for x in range(0, 10)])
+result["glide"] = result["cl"]/result["cd"]
+print(result)
+

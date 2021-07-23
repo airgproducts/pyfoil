@@ -1,0 +1,1 @@
+from pyfoil.airfoil import Airfoil

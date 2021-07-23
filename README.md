@@ -1,6 +1,6 @@
 # pyfoil
 
-*A library to read, create, modify and analyse airfoils in Python*
+*A library to read, create, modify and analyze airfoils in Python*
 
 ## features
 
@@ -17,7 +17,9 @@
     * get points
     * get/set thickness
     * get/set camber
- * analyze airfoils (c++ xfoil lib included)
+ * analyze airfoils (c++/pybind11 xfoil lib included)
+    * this was extracted from [xflr5](http://www.xflr5.tech/xflr5.htm)
+    * GPL-V3
 
 A major convention is that a local coordinate-system is ranging from x=-1 (upper back) towards the nose (x=0) towards the lower back (x=+1)
 

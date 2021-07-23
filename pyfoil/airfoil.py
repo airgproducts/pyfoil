@@ -41,7 +41,7 @@ class Airfoil:
         self.solver.load(self.curve.tolist())
 
     @property
-    def ncrit(self):
+    def ncrit(self) -> float:
         return self.solver.ncrit
 
     @ncrit.setter
@@ -49,7 +49,7 @@ class Airfoil:
         self.solver.ncrit = value
     
     @property
-    def xtr_bottom(self):
+    def xtr_bottom(self) -> float:
         return self.solver.xtr_bottom
 
     @xtr_bottom.setter
@@ -57,7 +57,7 @@ class Airfoil:
         self.solver.xtr_bottom = value
     
     @property
-    def xtr_top(self):
+    def xtr_top(self) -> float:
         return self.solver.xtr_top
 
     @xtr_top.setter
@@ -70,7 +70,7 @@ class Airfoil:
             aoa = aoa * math.pi / 180
         return self.solver.run_aoa(aoa)
     
-    def xfoil_polar(self, aoa_start, aoa_end, steps=10, degree=True):
+    def xfoil_polar(self, aoa_start, aoa_end, steps=10, degree=True) -> pandas.DataFrame:
         delta = (aoa_end-aoa_start)/(steps-1)
         data = []
         for i in range(steps):
@@ -158,7 +158,7 @@ class Airfoil:
     def copy(self) -> "Airfoil":
         return Airfoil(self.curve.nodes, self.name)
 
-    def __add__(self, other, conservative=False):
+    def __add__(self, other, conservative=False) -> "Airfoil":
         """
         Mix 2 Profiles
         """
@@ -233,7 +233,7 @@ class Airfoil:
         x_values += [vector[0] for vector in self.curve.nodes[i:]]
         return x_values
 
-    def set_x_values(self, xval):
+    def set_x_values(self, xval) -> "Airfoil":
         """Set X-Values of airfoil to defined points."""
         new_nodes = [
             self.get(x) for x in xval
@@ -242,10 +242,10 @@ class Airfoil:
         return Airfoil(new_nodes)
 
     @property
-    def numpoints(self):
+    def numpoints(self) -> int:
         return len(self.curve.nodes)
 
-    def resample(self, numpoints):
+    def resample(self, numpoints) -> "Airfoil":
         numpoints -= numpoints % 2  # brauchts?
 
         xtemp = lambda x: ((x > 0.5) - (x < 0.5)) * (1 - math.sin(math.pi * x))
@@ -273,7 +273,7 @@ class Airfoil:
         return Airfoil(self.curve * [1, factor])
 
     @property
-    def camber_line(self):
+    def camber_line(self) -> euklid.vector.Interpolation:
         xvals = sorted(set(map(abs, self.x_values)))
         return euklid.vector.Interpolation([self.profilepoint(i, 0.) for i in xvals])
 
@@ -283,7 +283,7 @@ class Airfoil:
         """return the maximum camber of the airfoil"""
         return max([p[1] for p in self.camber_line])
 
-    def set_camber(self, newcamber):
+    def set_camber(self, newcamber) -> "Airfoil":
         """Set maximal camber to the new value"""
         old_camber = self.camber
         factor = newcamber / old_camber - 1
@@ -293,7 +293,7 @@ class Airfoil:
 
         return Airfoil(data)
 
-    def insert_point(self, pos, tolerance=1e-5):
+    def insert_point(self, pos, tolerance=1e-5) -> "Airfoil":
         nearest_x_value = self.find_nearest_x_value(pos)
         new_nodes = self.curve.nodes[:]
 
@@ -305,7 +305,7 @@ class Airfoil:
 
         return Airfoil(new_nodes)
 
-    def remove_points(self, start, end, tolerance=0.):
+    def remove_points(self, start, end, tolerance=0.) -> "Airfoil":
         new_data = []
 
         ik_start = self.get_ik(start)
@@ -323,7 +323,7 @@ class Airfoil:
         
         return Airfoil(new_data)
 
-    def move_nearest_point(self, pos):
+    def move_nearest_point(self, pos) -> "Airfoil":
         ik = self(pos)
         diff = ik % 1.
         if diff < 0.5:
@@ -337,7 +337,7 @@ class Airfoil:
 
         return Airfoil(new_nodes)
 
-    def find_nearest_x_value(self, x):
+    def find_nearest_x_value(self, x: float) -> float:
         ik = self.get_ik(x)
 
         diff = ik % 1.
@@ -358,14 +358,14 @@ class Airfoil:
         )
 
     @classmethod
-    def fetch(cls, name='atr72sm', base_url='http://m-selig.ae.illinois.edu/ads/coord/{name}.dat'):
+    def fetch(cls, name='atr72sm', base_url='http://m-selig.ae.illinois.edu/ads/coord/{name}.dat') -> "Airfoil":
         import urllib.request
         
         with urllib.request.urlopen(base_url.format(name=name)) as data_file:
             dat_str = data_file.read().decode('utf8')
             return cls._import_dat(dat_str.split("\n"))
 
-    def add_flap(self, flap_begin, flap_amount):
+    def add_flap(self, flap_begin, flap_amount) -> "Airfoil":
         
         def f(x, a, b):
             c1, c2, c3 = -a**2*b/(a**2 - 2*a + 1), 2*a*b/(a**2 - 2*a + 1), -b/(a**2 - 2*a + 1)
@@ -384,7 +384,7 @@ class Airfoil:
         return Airfoil(new_nodes, self.name+"_flap")
 
     @classmethod
-    def compute_naca(cls, naca=1234, numpoints=100):
+    def compute_naca(cls, naca=1234, numpoints=100) -> "Airfoil":
         nodes = compute_naca(naca, numpoints)
         return cls(nodes, name=f"NACA_{naca:04d}").normalized()
 
@@ -397,14 +397,14 @@ class Airfoil:
         return profile.normalized()
 
     @classmethod
-    def compute_joukowsky(cls, m=-0.1+0.1j, numpoints=100):
+    def compute_joukowsky(cls, m=-0.1+0.1j, numpoints=100) -> "Airfoil":
         airfoil = JoukowskyAirfoil(m)
 
         profile = cls(airfoil.coordinates(numpoints), f"joukowsky_{m}")
         return profile.normalized().resample(numpoints)
 
     @classmethod
-    def compute_vandevooren(cls, tau=0.05, epsilon=0.05, numpoints=100):
+    def compute_vandevooren(cls, tau=0.05, epsilon=0.05, numpoints=100) -> "Airfoil":
         airfoil = VanDeVoorenAirfoil(tau=tau, epsilon=epsilon)
 
         profile = cls(airfoil.coordinates(numpoints), f"VanDeVooren_tau={tau}_epsilon={epsilon}")        

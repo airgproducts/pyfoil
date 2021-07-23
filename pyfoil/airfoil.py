@@ -275,7 +275,7 @@ class Airfoil:
     @property
     def camber_line(self):
         xvals = sorted(set(map(abs, self.x_values)))
-        return euklid.vector.PolyLine2D([self.profilepoint(i, 0.) for i in xvals])
+        return euklid.vector.Interpolation([self.profilepoint(i, 0.) for i in xvals])
 
     #@cached_property('self')
     @property
@@ -287,9 +287,9 @@ class Airfoil:
         """Set maximal camber to the new value"""
         old_camber = self.camber
         factor = newcamber / old_camber - 1
-        now = dict(self.camber_line)
+        old_camber_line = self.camber_line
 
-        data = [p + [0, now[p[0]] * factor] for p in self.curve.nodes]
+        data = [p + [0, old_camber_line.get_value(p[0]) * factor] for p in self.curve.nodes]
 
         return Airfoil(data)
 

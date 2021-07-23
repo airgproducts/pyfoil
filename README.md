@@ -5,34 +5,23 @@
 ## features
 
  * read `.dat` files
- * create naca-airfoils
- * create joukowsky, treffz, vandevooren airfoils
+ * airfoil generators:
+    * naca
+    * joukowsky
+    * treffz
+    * vandevooren
+    * web (selig db)
  * modify airfoils
     * resample
     * normalize
+    * get points
+    * get/set thickness
+    * get/set camber
  * analyze airfoils (c++ xfoil lib included)
+
+A major convention is that a local coordinate-system is ranging from x=-1 (upper back) towards the nose (x=0) towards the lower back (x=+1)
 
 
 ## example
 
-``` python
-import pyfoil
-
-airfoil = pyfoil.Airfoil.compute_naca(3315).normalized()
-airfoil.resample(50).numpoints
->51
-
-airfoil.solver.ncrit = 9.
-airfoil.xfoil(5, degree=True)
->cl	0.77906
->cd	0.00837475
->cdp	0.00239627
->cm	-0.041238
->xtr_top	0.267372
->xtr_bottom	0.5
->reynolds	2e+06
->converged	1
-
-
-
-```
+**see [example.ipynb](example.ipynb)**

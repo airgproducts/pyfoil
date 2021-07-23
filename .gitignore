@@ -2,3 +2,4 @@ build
 *.so
 *.egg-info
 *.pyc
+.ipynb_checkpoints

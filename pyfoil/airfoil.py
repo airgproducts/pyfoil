@@ -64,18 +64,18 @@ class Airfoil:
     def xtr_top(self, value: float):
         self.solver.xtr_top = value
     
-    def xfoil(self, aoa: float, degree=True) -> xfoil.Result:
+    def xfoil_aoa(self, aoa: float, degree=True) -> xfoil.Result:
         # TODO: reynolds
         if degree:
             aoa = aoa * math.pi / 180
         return self.solver.run_aoa(aoa)
     
-    def get_polar(self, aoa_start, aoa_end, steps=10, degree=True):
+    def xfoil_polar(self, aoa_start, aoa_end, steps=10, degree=True):
         delta = (aoa_end-aoa_start)/(steps-1)
         data = []
         for i in range(steps):
             aoa = aoa_start + delta*i
-            result = self.xfoil(aoa, degree=degree)
+            result = self.xfoil_aoa(aoa, degree=degree)
 
             if result.converged:
                 data.append([
@@ -379,7 +379,7 @@ class Airfoil:
 
         for p in self.curve.nodes:
             dy = f(p[0], flap_begin, flap_amount)
-            new_nodes.append(euklid.vector.Vector2D(p[0], p[1]+dy))
+            new_nodes.append(euklid.vector.Vector2D([p[0], p[1]+dy]))
         
         return Airfoil(new_nodes, self.name+"_flap")
 

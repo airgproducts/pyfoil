@@ -34,7 +34,13 @@ if (BUILD_PYTHON_BINDINGS)
   set(Python_ADDITIONAL_VERSIONS ${py})
   find_package(PythonInterp ${py} REQUIRED)
   find_package(PythonLibs ${py} REQUIRED)
-  find_package(pybind11 2.0 REQUIRED)
+  
+  if(EXISTS ${PROJECT_SOURCE_DIR}/lib/pybind11/CMakeLists.txt)
+      add_subdirectory(${PROJECT_SOURCE_DIR}/lib/pybind11)
+  else()
+      find_package(pybind11 REQUIRED)
+  endif()
+  
 endif()
 
 # FIND DEPENDENCIES

@@ -83,7 +83,7 @@ with open("README.md") as readme_file:
 setup(
     name='pyfoil',
     version=version,
-    packages=["pyfoil"],
+    packages=["pyfoil", "pyfoil.generators"],
     description="python library for airfoil generation, modification and analysis (xfoil included)",
     ext_modules=[CMakeExtension('.')],
     cmdclass={"build_ext": CMakeBuild},

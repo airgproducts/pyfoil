@@ -3,3 +3,7 @@ build
 *.egg-info
 *.pyc
 .ipynb_checkpoints
+.mypy_cache
+
+xfoil-stubs
+pyfoil-stubs

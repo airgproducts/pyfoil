@@ -76,7 +76,7 @@ public:
     virtual ~XFoil();
 
 public:
-    bool debug;
+    bool debug = false;
     
     void interpolate(double xf1[], double yf1[], int n1,
                      double xf2[], double yf2[], int n2, double mixt);

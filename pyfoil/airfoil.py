@@ -22,6 +22,7 @@ class Airfoil:
     def __init__(self, data, name="unnamed") -> None:
         self.name = name
         self.curve = euklid.vector.PolyLine2D(data)
+
         self.solver = xfoil.Solver()
         self._setup()
 
@@ -38,7 +39,8 @@ class Airfoil:
             [[ p[0], i+self.noseindex] for i, p in enumerate(self.curve.nodes[self.noseindex:])]
         )
 
-        self.solver.load(self.curve.tolist())
+        if len(self.curve) <= 300:
+            self.solver.load(self.curve.tolist())
 
     @property
     def ncrit(self) -> float:
@@ -75,7 +77,11 @@ class Airfoil:
         data = []
         for i in range(steps):
             aoa = aoa_start + delta*i
-            result = self.xfoil_aoa(aoa, degree=degree)
+
+            try:
+                result = self.xfoil_aoa(aoa, degree=degree)
+            except RuntimeError:
+                continue
 
             if result.converged:
                 data.append([
@@ -154,6 +160,14 @@ class Airfoil:
     @property
     def normvectors(self) -> euklid.vector.PolyLine2D:
         return self.curve.normvectors()
+
+    def __deepcopy__(self, memo):
+        cpy = self.copy()
+        memo[id(self)] = cpy
+        return cpy
+
+    def __copy__(self):
+        return self.copy()
 
     def copy(self) -> "Airfoil":
         return Airfoil(self.curve.nodes, self.name)

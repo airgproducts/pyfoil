@@ -81,10 +81,7 @@ class CMakeBuild(build_ext):
         except subprocess.CalledProcessError:
             print("couldn't run mypy")
 
-version = "-"
-with open("src/version.hpp") as version_file:
-    #print(version_file.read())
-    version = re.findall(r"version\s=\s['\"]([0-9\._]+)['\"]", version_file.read())[0]
+version = "0.1.0"
 
 with open("README.md") as readme_file:
     long_description = readme_file.read()

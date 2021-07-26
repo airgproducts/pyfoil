@@ -7,6 +7,7 @@ import re
 import platform
 import subprocess
 import multiprocessing
+import shutil
 
 from distutils.version import LooseVersion
 from distutils.core import setup
@@ -80,6 +81,8 @@ class CMakeBuild(build_ext):
             subprocess.check_call([sys.executable, 'stubs.py', stubgen_path])
         except subprocess.CalledProcessError:
             print("couldn't run mypy")
+
+        shutil.copytree("pyfoil", stubgen_path+"/pyfoil")
 
 version = "0.1.0"
 

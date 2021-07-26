@@ -8,7 +8,11 @@ import mypy.stubgen
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    stubgen_path = "./stubs"
+    stubgen_path = "."
+
+    stubgen_path = "."
+    if len(sys.argv) > 1:
+        stubgen_path = sys.argv[1]
 
     sys.path.append(stubgen_path)
 
@@ -20,13 +24,14 @@ if __name__ == '__main__':
 
     mypy.stubgen.generate_stubs(opts)
 
-    for d in ("pyfoil-stubs", "xfoil-stubs"):
+    xfoil_dir = os.path.join(stubgen_path, "xfoil-stubs")
+    pyfoil_dir = os.path.join(stubgen_path, "pyfoil-stubs")
+
+    for d in (xfoil_dir, pyfoil_dir):
         if os.path.isdir(d):
             shutil.rmtree(d)
             
-    shutil.move(os.path.join(stubgen_path, "pyfoil"), "pyfoil-stubs")
+    shutil.move(os.path.join(stubgen_path, "pyfoil"), pyfoil_dir)
     
-    os.mkdir("xfoil-stubs")
-    shutil.move(os.path.join(stubgen_path, "xfoil.pyi"), "xfoil-stubs/__init__.pyi")
-
-    shutil.rmtree("stubs")
+    os.mkdir(xfoil_dir)
+    shutil.move(os.path.join(stubgen_path, "xfoil.pyi"), os.path.join(xfoil_dir, "__init__.pyi"))

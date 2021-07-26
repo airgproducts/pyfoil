@@ -4,6 +4,7 @@ build
 *.pyc
 .ipynb_checkpoints
 .mypy_cache
+dist
 
 xfoil-stubs
 pyfoil-stubs

@@ -72,6 +72,15 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
+        stubgen_path = self.build_lib
+        if not os.path.exists(self.build_lib):
+            stubgen_path = self.build_temp
+
+        try:
+            subprocess.check_call([sys.executable, 'stubs.py', stubgen_path])
+        except subprocess.CalledProcessError:
+            print("couldn't run mypy")
+
 version = "-"
 with open("src/version.hpp") as version_file:
     #print(version_file.read())

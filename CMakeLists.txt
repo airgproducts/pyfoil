@@ -27,26 +27,21 @@ endif()
 
 # OPTIONS
 set (CMAKE_CXX_STANDARD 14)
-OPTION(BUILD_PYTHON_BINDINGS "create python bindings" ON)
 
-if (BUILD_PYTHON_BINDINGS)
-  ## PYTHON
-  set(Python_ADDITIONAL_VERSIONS ${py})
-  find_package(PythonInterp ${py} REQUIRED)
-  find_package(PythonLibs ${py} REQUIRED)
-  
-  if(EXISTS ${PROJECT_SOURCE_DIR}/lib/pybind11/CMakeLists.txt)
-      add_subdirectory(${PROJECT_SOURCE_DIR}/lib/pybind11)
-  else()
-      find_package(pybind11 REQUIRED)
-  endif()
-  
+if(EXISTS ${PROJECT_SOURCE_DIR}/lib/pybind11/CMakeLists.txt)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/lib/pybind11)
+else()
+    find_package(pybind11 REQUIRED)
 endif()
+  
 
 # FIND DEPENDENCIES
 
-add_subdirectory(lib/fmt)
-find_package(fmt)
+if(EXISTS ${PROJECT_SOURCE_DIR}/lib/fmt/CMakeLists.txt)
+    add_subdirectory(lib/fmt)
+else()
+    find_package(fmt)
+endif()
 
 add_subdirectory(src xfoil)
 

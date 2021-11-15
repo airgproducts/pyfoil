@@ -44,30 +44,6 @@ class Airfoil:
             [[ p[0], i+self.noseindex] for i, p in enumerate(self.curve.nodes[self.noseindex:])]
         )
 
-    @property
-    def ncrit(self) -> float:
-        return self.solver.ncrit
-
-    @ncrit.setter
-    def ncrit(self, value: float):
-        self.solver.ncrit = value
-    
-    @property
-    def xtr_bottom(self) -> float:
-        return self.solver.xtr_bottom
-
-    @xtr_bottom.setter
-    def xtr_bottom(self, value: float):
-        self.solver.xtr_bottom = value
-    
-    @property
-    def xtr_top(self) -> float:
-        return self.solver.xtr_top
-
-    @xtr_top.setter
-    def xtr_top(self, value: float):
-        self.solver.xtr_top = value
-
     def _load_xfoil(self):
         solver.ncrit = self.ncrit
         solver.xtr_top = self.xtr_top

@@ -61,7 +61,7 @@ class Airfoil:
             aoa = aoa * math.pi / 180
 
         if load:
-            self._load_xfoil
+            self._load_xfoil()
 
         return solver.run_aoa(aoa)
     

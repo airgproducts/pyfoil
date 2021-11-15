@@ -14,16 +14,21 @@ from pyfoil.generators import JoukowskyAirfoil, VanDeVoorenAirfoil, TrefftzKutta
 
 logger = logging.getLogger(__name__)
 
+solver = xfoil.Solver()
 
 class Airfoil:
     noseindex: int
     name: str
     
+    ncrit = 4
+    xtr_top = 0.5
+    xtr_bottom = 0.5
+
+    
     def __init__(self, data, name="unnamed") -> None:
         self.name = name
         self.curve = euklid.vector.PolyLine2D(data)
 
-        self.solver = xfoil.Solver()
         self._setup()
 
     def _setup(self):
@@ -38,9 +43,6 @@ class Airfoil:
             [[-p[0], i] for i, p in enumerate(self.curve.nodes[:self.noseindex])] +
             [[ p[0], i+self.noseindex] for i, p in enumerate(self.curve.nodes[self.noseindex:])]
         )
-
-        if len(self.curve) <= 300:
-            self.solver.load(self.curve.tolist())
 
     @property
     def ncrit(self) -> float:
@@ -65,21 +67,37 @@ class Airfoil:
     @xtr_top.setter
     def xtr_top(self, value: float):
         self.solver.xtr_top = value
+
+    def _load_xfoil(self):
+        solver.ncrit = self.ncrit
+        solver.xtr_top = self.xtr_top
+        solver.xtr_bottom = self.xtr_bottom
+
+        if len(self.curve) > 300:
+            raise Exception(f"too many numpoints for profile {self.name}: {len(self.curve)}")
+        
+        solver.load(self.curve.tolist())
+
     
-    def xfoil_aoa(self, aoa: float, degree=True) -> xfoil.Result:
+    def xfoil_aoa(self, aoa: float, degree=True, load=True) -> xfoil.Result:
         # TODO: reynolds
         if degree:
             aoa = aoa * math.pi / 180
-        return self.solver.run_aoa(aoa)
+
+        if load:
+            self._load_xfoil
+
+        return solver.run_aoa(aoa)
     
     def xfoil_polar(self, aoa_start, aoa_end, steps=10, degree=True) -> pandas.DataFrame:
+        self._load_xfoil()
         delta = (aoa_end-aoa_start)/(steps-1)
         data = []
         for i in range(steps):
             aoa = aoa_start + delta*i
 
             try:
-                result = self.xfoil_aoa(aoa, degree=degree)
+                result = self.xfoil_aoa(aoa, degree=degree, load=False)
             except RuntimeError:
                 continue
 

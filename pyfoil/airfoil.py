@@ -386,7 +386,7 @@ class Airfoil:
         new_nodes = []
 
         for p in self.curve.nodes:
-            dy = f(p[0], flap_begin, flap_amount)
+            dy = f(abs(p[0]), flap_begin, flap_amount)
             new_nodes.append(euklid.vector.Vector2D([p[0], p[1]+dy]))
         
         return Airfoil(new_nodes, self.name+"_flap")

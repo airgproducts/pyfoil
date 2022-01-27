@@ -373,7 +373,7 @@ class Airfoil:
             dat_str = data_file.read().decode('utf8')
             return cls._import_dat(dat_str.split("\n"))
 
-    def add_flap(self, flap_begin, flap_amount) -> "Airfoil":
+    def add_flap(self, begin, amount) -> "Airfoil":
         
         def f(x, a, b):
             c1, c2, c3 = -a**2*b/(a**2 - 2*a + 1), 2*a*b/(a**2 - 2*a + 1), -b/(a**2 - 2*a + 1)
@@ -386,7 +386,7 @@ class Airfoil:
         new_nodes = []
 
         for p in self.curve.nodes:
-            dy = f(abs(p[0]), flap_begin, flap_amount)
+            dy = f(abs(p[0]), begin, amount)
             new_nodes.append(euklid.vector.Vector2D([p[0], p[1]+dy]))
         
         return Airfoil(new_nodes, self.name+"_flap")

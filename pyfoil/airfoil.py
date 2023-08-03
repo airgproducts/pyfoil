@@ -19,6 +19,7 @@ solver = xfoil.Solver()
 class Airfoil:
     noseindex: int
     name: str
+    curve: euklid.vector.PolyLine2D
     
     ncrit = 4
     xtr_top = 0.5
@@ -34,7 +35,7 @@ class Airfoil:
     def _setup(self):
         i = 0
         data = self.curve.nodes
-        while data[i + 1][0] < data[i][0] and i < len(data):
+        while data[i + 1][0] < data[i][0] and i < len(data) - 2:
             i += 1
         self.noseindex = i
 

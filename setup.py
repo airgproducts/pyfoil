@@ -84,7 +84,7 @@ class CMakeBuild(build_ext):
 
         shutil.copytree("pyfoil", stubgen_path+"/pyfoil")
 
-version = "0.1.4"
+version = "0.1.5"
 
 with open("README.md") as readme_file:
     long_description = readme_file.read()

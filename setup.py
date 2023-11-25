@@ -9,8 +9,6 @@ import subprocess
 import multiprocessing
 import shutil
 
-from distutils.version import LooseVersion
-from distutils.core import setup
 import setuptools
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
@@ -34,10 +32,11 @@ class CMakeBuild(build_ext):
             raise RuntimeError("CMake must be installed to build the following extensions: " +
                                ", ".join(e.name for e in self.extensions))
 
-        if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
-            if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+        if platform.system() == "Windows":#
+            cmake_version = re.search(r'version\s*([\d.]+)', out.decode()).group(1).split(".")
+            if cmake_version[0] <= '3':
+                if cmake_version[0] < '3' or cmake_version[1] < '1':
+                    raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
         for ext in self.extensions:
             self.build_extension(ext)
@@ -84,12 +83,12 @@ class CMakeBuild(build_ext):
 
         shutil.copytree("pyfoil", stubgen_path+"/pyfoil")
 
-version = "0.1.5"
+version = "0.1.6"
 
 with open("README.md") as readme_file:
     long_description = readme_file.read()
 
-setup(
+setuptools.setup(
     name='pyfoil',
     version=version,
     packages=["pyfoil", "pyfoil.generators"],

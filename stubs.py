@@ -1,18 +1,23 @@
 import sys
 import os
+import pathlib
 import shutil
 import multiprocessing
+
+print(sys.executable)
 
 import mypy.stubgen
 
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    stubgen_path = "."
 
-    stubgen_path = "."
     if len(sys.argv) > 1:
         stubgen_path = sys.argv[1]
+    else:
+        stubgen_path = str(pathlib.Path(__file__).absolute().parent)
+
+    print(f"running in {stubgen_path}")
 
     sys.path.append(stubgen_path)
 

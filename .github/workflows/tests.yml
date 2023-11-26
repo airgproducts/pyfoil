@@ -29,6 +29,9 @@ jobs:
         run: |
           pip install wheel
           pip install mypy
+          python -m mypy --version
+      - name: output mypy version
+        run: python -m mypy --version
       - name: install package
         run: pip install . -v
       - name: test

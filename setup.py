@@ -94,7 +94,7 @@ setuptools.setup(
     cmdclass={"build_ext": CMakeBuild},
     license='GPL-V3',
     long_description=long_description,
-    install_requires=["euklid", "pandas"],
+    install_requires=["euklid", "pandas", "mypy"],
     author='airgproducts',
     url='http://github.com/airgproducts/pyfoil',
     #test_suite="tests.test_suite",

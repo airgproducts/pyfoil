@@ -76,10 +76,7 @@ class CMakeBuild(build_ext):
         if not os.path.exists(self.build_lib):
             stubgen_path = self.build_temp
 
-        try:
-            subprocess.check_call([sys.executable, 'stubs.py', stubgen_path])
-        except subprocess.CalledProcessError:
-            print("couldn't run mypy")
+        subprocess.check_call(["python", 'stubs.py', stubgen_path])
 
         shutil.copytree("pyfoil", stubgen_path+"/pyfoil")
 

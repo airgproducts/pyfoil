@@ -5,7 +5,11 @@ import shutil
 import multiprocessing
 
 print(sys.executable)
-print(sys.path)
+
+for dir in sys.path:
+    print(dir)
+    for subdir in os.listdir(dir):
+        print(f"    {subdir}")
 
 import mypy.stubgen
 

@@ -76,7 +76,7 @@ class CMakeBuild(build_ext):
         if not os.path.exists(self.build_lib):
             stubgen_path = self.build_temp
 
-        subprocess.check_call([sys.executable, 'stubs.py', stubgen_path], shell=True)
+        subprocess.check_call([sys.executable, 'stubs.py', stubgen_path])
 
 version = "0.1.6"
 
@@ -92,7 +92,7 @@ setuptools.setup(
     cmdclass={"build_ext": CMakeBuild},
     license='GPL-V3',
     long_description=long_description,
-    install_requires=["euklid", "pandas", "mypy"],
+    install_requires=["euklid", "pandas"],
     author='airgproducts',
     url='http://github.com/airgproducts/pyfoil',
     #test_suite="tests.test_suite",

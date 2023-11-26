@@ -4,15 +4,6 @@ import pathlib
 import shutil
 import multiprocessing
 
-print(sys.executable)
-
-for dir in sys.path:
-    print(dir)
-    basepath = pathlib.Path(dir)
-    if basepath.is_dir():
-        for subdir in basepath.iterdir():
-            print(f"    {subdir}")
-
 import mypy.stubgen
 
 

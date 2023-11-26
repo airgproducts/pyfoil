@@ -44,9 +44,7 @@ jobs:
             python-version: ${{ matrix.python-version }}
       - name: Build
         run: |
-          pip install wheel
-          pip install mypy
-          python setup.py bdist_wheel
+          pip wheel . -w dist
       - name: Upload wheel
         uses: actions/upload-artifact@v1
         with:

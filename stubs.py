@@ -5,6 +5,7 @@ import shutil
 import multiprocessing
 
 print(sys.executable)
+print(sys.path)
 
 import mypy.stubgen
 

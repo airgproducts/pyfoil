@@ -44,7 +44,7 @@ jobs:
             python-version: ${{ matrix.python-version }}
       - name: Build
         run: |
-          pip wheel . -w dist
+          pip wheel . --no-deps -w dist
       - name: Upload wheel
         uses: actions/upload-artifact@v1
         with:
@@ -66,6 +66,6 @@ jobs:
         run: rm dist/*-linux_x86_64.whl
       - name: Publish distribution package to PyPI
         #if: env.branch == 'master'
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@v1
         with:
           password: ${{ secrets.pypi_password }}

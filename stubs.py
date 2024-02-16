@@ -28,13 +28,13 @@ if __name__ == '__main__':
     mypy.stubgen.generate_stubs(opts)
 
     xfoil_dir = os.path.join(stubgen_path, "xfoil-stubs")
-    pyfoil_dir = os.path.join(stubgen_path, "pyfoil-stubs")
+    #pyfoil_dir = os.path.join(stubgen_path, "pyfoil-stubs")
 
-    for d in (xfoil_dir, pyfoil_dir):
+    for d in (xfoil_dir, ):
         if os.path.isdir(d):
             shutil.rmtree(d)
             
-    shutil.move(os.path.join(stubgen_path, "pyfoil"), pyfoil_dir)
+    #shutil.move(os.path.join(stubgen_path, "pyfoil"), pyfoil_dir)
     
     os.mkdir(xfoil_dir)
     shutil.move(os.path.join(stubgen_path, "xfoil.pyi"), os.path.join(xfoil_dir, "__init__.pyi"))

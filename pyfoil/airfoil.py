@@ -3,7 +3,6 @@ import os
 import re
 import math
 import logging
-import xml.etree.ElementTree as XMLTree
 
 import euklid
 import xfoil
@@ -145,6 +144,9 @@ class Airfoil:
         # de-rotate
         rotation = euklid.vector.Rotation2D(-diff.angle())
         new_nodes = [rotation.apply(p) for p in new_curve.nodes]
+
+        new_nodes[0][0] = 1.
+        new_nodes[-1][0] = 1.
 
         if close:
             new_nodes[0][1] = 0

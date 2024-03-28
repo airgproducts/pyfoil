@@ -78,7 +78,7 @@ class CMakeBuild(build_ext):
 
         subprocess.check_call([sys.executable, 'stubs.py', stubgen_path])
 
-version = "0.1.6"
+version = "0.1.7"
 
 with open("README.md") as readme_file:
     long_description = readme_file.read()

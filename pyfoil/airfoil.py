@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Sequence
 import os
 import re
 import math
@@ -24,8 +24,7 @@ class Airfoil:
     xtr_top = 0.5
     xtr_bottom = 0.5
 
-    
-    def __init__(self, data, name="unnamed") -> None:
+    def __init__(self, data: Sequence[euklid.vector.Vector2D | tuple[float, float]], name="unnamed") -> None:
         self.name = name
         self.curve = euklid.vector.PolyLine2D(data)
 
@@ -89,7 +88,7 @@ class Airfoil:
         return pandas.DataFrame(data, columns=["aoa", "cl", "cd", "cdp", "cm"])
 
 
-    def __mul__(self, value) -> "Airfoil":
+    def __mul__(self, value: float) -> "Airfoil":
         fakt = euklid.vector.Vector2D([1, float(value)])
 
         return Airfoil(self.curve * fakt)
@@ -190,8 +189,8 @@ class Airfoil:
             "name": self.name
         }
 
-    _re_number = r"([-+]?\d*\.\d*(?:[eE][+-]?\d+)?|\d+)"
-    _re_coord_line = re.compile(rf"\s*{_re_number}\s+{_re_number}\s*")
+    _re_number = r"[+-]?(?:(?:\d+\.?\d*)|(?:\.\d+))(?:[eE][+-]?\d+)?|\d+"
+    _re_coord_line = re.compile(rf"\s*({_re_number})\s+({_re_number})\s*")
 
     @classmethod
     def import_from_dat(cls, path) -> "Airfoil":

@@ -422,20 +422,16 @@ class Airfoil:
     
     def _repr_svg_(self) -> str:
         result = '<svg baseProfile="full" height="100%" version="1.1" viewBox="-0.1,-0.25,1.2,0.5" width="100%" xmlns="http://www.w3.org/2000/svg">\n'
-        result += """<defs><style type="text/css">
-            line { vector-effect: non-scaling-stroke; stroke-width: 1; fill: none}
-            polyline { vector-effect: non-scaling-stroke; stroke-width: 1; fill: none}
-        </style></defs>"""
 
         result += '<g transform="scale(1,-1)">'
-        result += '<polyline stroke="black" stroke-width="0.25" points="'
+        result += '<polyline stroke="black" stroke-width="0.25" vector-effect="non-scaling-stroke" fill="none" points="'
 
         for p in self.curve.nodes:
             result += f"{p[0]},{p[1]} "
         
         result = result[:-1] + '"></polyline>'
 
-        result += '<polyline stroke="red" stroke-width="0.25" points="'
+        result += '<polyline stroke="red" stroke-width="0.25" vector-effect="non-scaling-stroke" fill="none" points="'
 
         for p in self.camber_line.nodes:
             result += f"{p[0]},{p[1]} "

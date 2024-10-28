@@ -8,7 +8,7 @@ jobs:
   build-wheel-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
       - uses: RalfG/python-wheels-manylinux-build@v0.3.4-manylinux2014_x86_64
@@ -30,7 +30,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
       - name: setup xcode version
@@ -46,7 +46,7 @@ jobs:
         run: |
           pip wheel . --no-deps -w dist
       - name: Upload wheel
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
@@ -56,9 +56,9 @@ jobs:
     needs: [build-wheel-linux, build-wheel-matrix]
     steps:
       - name: checkout source code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Load artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist

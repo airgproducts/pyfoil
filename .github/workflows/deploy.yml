@@ -16,7 +16,7 @@ jobs:
           python-versions: 'cp310-cp310 cp311-cp311 cp312-cp312'
           build-requirements: 'mypy'
       - name: Upload wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist
@@ -37,7 +37,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '13'
+          xcode-version: '14'
       - name: python
         uses: actions/setup-python@v4
         with:
@@ -46,7 +46,7 @@ jobs:
         run: |
           pip wheel . --no-deps -w dist
       - name: Upload wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist
@@ -58,7 +58,7 @@ jobs:
       - name: checkout source code
         uses: actions/checkout@v4
       - name: Load artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist

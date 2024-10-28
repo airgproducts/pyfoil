@@ -16,7 +16,7 @@ jobs:
           python-versions: 'cp310-cp310 cp311-cp311 cp312-cp312'
           build-requirements: 'mypy'
       - name: Upload wheel
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
